@@ -1,0 +1,22 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Encuestas</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/users/signup">Registrate</a>
+                </li>
+                <li class="nav-item">
+                    {{#if user}}
+                    <a class="nav-link" href="/users/cerrarSession">Cerrar Session</a>
+                    {{else}}
+                    <a class="nav-link" href="/users/signin">Inicia Session</a>
+                    {{/if}}
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
