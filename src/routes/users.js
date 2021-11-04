@@ -9,21 +9,19 @@ root.get('/users/signin', (req, res) => {
 });
 
 root.post('/users/signin', passport.authenticate('local', {
-    successRedirect: '/',
+    successRedirect: '/perfil',
     failureRedirect: '/users/signin',
     failureFlash: true
 }));
-
-
 root.get('/users/signup', (req, res) => {
     res.render('users/signup');
 });
 
 root.post('/users/signup', async(req, res) => {
-    var { nombre, telefono, email, genero, contraseña, contraseña1, direccion } = req.body;
+    var { name, telefono, email, genero, contraseña, contraseña1, direccion } = req.body;
     var id = 0;
     const errores = [];
-    if (nombre == "") {
+    if (name == "") {
         errores.push({ text: 'Debe ingresar un Nombre!' });
     }
     if (email == "") {
@@ -39,19 +37,19 @@ root.post('/users/signup', async(req, res) => {
         errores.push({ text: 'Su contraseña no coicide!' });
     }
     if (errores.length > 0) {
-        res.render('users/signup', { errores, nombre, telefono, email, genero, contraseña, contraseña1, direccion });
+        res.render('users/signup', { errores, name, telefono, email, genero, contraseña, contraseña1, direccion });
     } else {
         const consulta = await pgAdmin.query("SELECT * FROM usuario WHERE email = $1", [email]);
         console.log(consulta.rows);
         if (consulta.rows.length > 0) {
             errores.push({ text: 'El email ya esta registrado' });
-            res.render('users/signup', { errores, nombre, telefono, email, genero, contraseña, contraseña1, direccion });
+            res.render('users/signup', { errores, name, telefono, email, genero, contraseña, contraseña1, direccion });
         } else {
-            var usuarioActual = new User(id, nombre, telefono, email, genero, contraseña, direccion);
+            var usuarioActual = new User(id, name, telefono, email, genero, contraseña, direccion);
             usuarioActual.contraseña = await usuarioActual.encriptarPass(contraseña);
             await pgAdmin.query(
-                "INSERT INTO usuario (nombre,telefono, email, genero,contraseña, direccion) VALUES ($1,$2,$3,$4,$5,$6)", [
-                    usuarioActual.nombre,
+                "INSERT INTO usuario (name,telefono, email, genero,contraseña, direccion) VALUES ($1,$2,$3,$4,$5,$6)", [
+                    usuarioActual.name,
                     usuarioActual.telefono,
                     usuarioActual.email,
                     usuarioActual.genero,

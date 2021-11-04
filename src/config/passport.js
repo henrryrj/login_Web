@@ -29,7 +29,9 @@ passport.serializeUser((usuarioCargado, done) => {
 });
 
 passport.deserializeUser((id, done) => {
-    pgAdmin.query("SELECT id FROM usuario WHERE id = $1", [id], (err, usuarioCargado) => {
-        done(err, usuarioCargado);
+    pgAdmin.query("SELECT * FROM usuario WHERE id = $1", [id], (err, usuarioCargado) => {
+        var usuario = new usercito();
+        usuario = usuario.insertarUsuario(usuarioCargado.rows);
+        done(err, usuario);
     });
 });
