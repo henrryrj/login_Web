@@ -5,11 +5,9 @@ const override = require('method-override');
 const session = require('express-session');
 const flash = require('connect-flash');
 const passport = require('passport');
-const Usuario = require('./models/usuario');
 //inicializacion
 const app = express();
 require('./database');
-require('./models/usuario');
 require('./config/passport');
 
 //settings
@@ -20,10 +18,6 @@ app.engine('.hbs', exphbs({
     defaultLayout: 'main',
     layoutsDir: path.join(app.get('views'), 'layouts'),
     partialsDir: path.join(app.get('views'), 'partials'),
-    runtimeOptions: {                           
-        //allowProtoPropertiesByDefault: true,
-         allowProtoMethodsByDefault: true
-    },
     extname: '.hbs',
 }));
 app.set('view engine', '.hbs');
