@@ -2,13 +2,13 @@ const bcrypt = require('bcryptjs');
 
 class Usuario {
     constructor(id, name, telefono, email, genero, contraseña, direccion) {
-        this.id = id,
-        this.name = name,
-        this.telefono = telefono,
-        this.email = email,
-        this.genero = genero,
-        this.contraseña = contraseña,
-        this.direccion = direccion
+        this.id = id;
+        this.name = name;
+        this.telefono = telefono;
+        this.email = email;
+        this.genero = genero;
+        this.contraseña = contraseña;
+        this.direccion = direccion;
     }
     insertarUsuario(lista) {
         if (lista.length> 0) {
@@ -26,11 +26,10 @@ class Usuario {
     }
     async encriptarPass(passACifrar) {
         const salt = await bcrypt.genSalt(10);
-        const passCifrada = bcrypt.hash(passACifrar, salt);
-        return passCifrada;
+         return bcrypt.hash(passACifrar, salt);
     }
     async desencriptarPass(passADesencriptar) {
-        return await bcrypt.compare(passADesencriptar.toString(), this.contraseña)
+        await bcrypt.compare(passADesencriptar.toString(), this.contraseña)
     }
 }
 module.exports = Usuario;
