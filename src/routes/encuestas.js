@@ -11,7 +11,7 @@ const dbFire = admin.database();
 
 const Pregunta = require('../models/pregunta');
 const Seccion = require('../models/seccion');
-const Encuesta = require('../models/encuesta');
+const { Encuesta, EncuestaSinSeccion } = require('../models/encuesta');
 
 //listar encuestas
 root.get('/A/listaDeEncuestas', async (req, res) => {
@@ -22,15 +22,17 @@ root.get('/A/getEncuesta/:idABuscar', async (req, res) => {
   var encuesta = new Encuesta();
   const idABuscar = req.params.idABuscar;
   const consulta = await pgAdmin.query(
-    'SELECT DISTINCT modelo_encuesta.id_encuesta, modelo_encuesta.nombre_e, modelo_encuesta.cant_secciones FROM modelo_encuesta, seccion,pregunta,op_de_respuesta WHERE (modelo_encuesta.id_encuesta = seccion.id_encuesta_s AND seccion.id_seccion = pregunta.id_seccion_p AND pregunta.id_pregunta = op_de_respuesta.id_pregunta_op_p AND pregunta.id_seccion_p = op_de_respuesta.id_seccion_op_p AND modelo_encuesta.id_encuesta = $1) OR (modelo_encuesta.id_encuesta = seccion.id_encuesta_s AND modelo_encuesta.id_encuesta =$1)',
+    'SELECT DISTINCT modelo_encuesta.* FROM modelo_encuesta, seccion,pregunta,op_de_respuesta WHERE (modelo_encuesta.id_encuesta = seccion.id_encuesta_s AND seccion.id_seccion = pregunta.id_seccion_p AND pregunta.id_pregunta = op_de_respuesta.id_pregunta_op_p AND pregunta.id_seccion_p = op_de_respuesta.id_seccion_op_p AND modelo_encuesta.id_encuesta = $1) OR (modelo_encuesta.id_encuesta = seccion.id_encuesta_s AND modelo_encuesta.id_encuesta =$1)',
     [idABuscar]
   );
   if (consulta.rows.length > 0) {
     const nodo = consulta.rows[0];
     encuesta.id_encuesta = nodo.id_encuesta;
     encuesta.nombre_e = nodo.nombre_e;
-    encuesta.seccion = await getSeccionesEncuesta(idABuscar);
+    encuesta.descripcion = nodo.descripcion;
     encuesta.cant_secciones = nodo.cant_secciones;
+    encuesta.estado = nodo.estado;
+    encuesta.seccion = await getSeccionesEncuesta(idABuscar);
     res.status(200).json(encuesta);
   } else {
     res.status(500).json({ message: 'La encuesta no existe.' });
@@ -39,12 +41,12 @@ root.get('/A/getEncuesta/:idABuscar', async (req, res) => {
 async function getSeccionesEncuesta(idABuscar) {
   var listaDeSeciones = [];
   const consulta = await pgAdmin.query(
-    'SELECT DISTINCT seccion.id_seccion, seccion.nombre_s, seccion.cant_preguntas FROM modelo_encuesta, seccion,pregunta,op_de_respuesta WHERE (modelo_encuesta.id_encuesta = seccion.id_encuesta_s AND seccion.id_seccion = pregunta.id_seccion_p AND pregunta.id_pregunta = op_de_respuesta.id_pregunta_op_p AND pregunta.id_seccion_p = op_de_respuesta.id_seccion_op_p AND modelo_encuesta.id_encuesta = $1) OR (modelo_encuesta.id_encuesta = seccion.id_encuesta_s AND modelo_encuesta.id_encuesta =$1)',
+    'SELECT DISTINCT seccion.id_seccion, seccion.nombre_s, seccion.cant_preguntas FROM modelo_encuesta, seccion,pregunta,op_de_respuesta WHERE (modelo_encuesta.id_encuesta = seccion.id_encuesta_s AND seccion.id_seccion = pregunta.id_seccion_p AND pregunta.id_pregunta = op_de_respuesta.id_pregunta_op_p AND pregunta.id_seccion_p = op_de_respuesta.id_seccion_op_p AND modelo_encuesta.id_encuesta = $1) OR (modelo_encuesta.id_encuesta = seccion.id_encuesta_s AND modelo_encuesta.id_encuesta =$1) order by seccion.id_seccion',
     [idABuscar]
   );
   if (consulta.rows.length > 0) {
     for (const nodo of consulta.rows) {
-      var seccion = new Seccion(nodo.id_seccion, nodo.nombre_s, [], nodo.cant_preguntas);
+      var seccion = new Seccion(nodo.id_seccion, nodo.nombre_s,nodo.cant_preguntas,[]);
       seccion.preguntas = await getListaPreguntasPorSeccion(idABuscar, seccion.id_seccion);
       if (listaDeSeciones.find((sec) => sec.id_seccion === seccion.id_seccion) == null) {
         listaDeSeciones.push(seccion);
@@ -61,17 +63,8 @@ async function getListaPreguntasPorSeccion(idABuscar, idSeccion) {
   );
   if (consulta.rows.length > 0) {
     for (const nodo of consulta.rows) {
-      var pregunta = new Pregunta(
-        nodo.id_pregunta,
-        nodo.nombre_p,
-        nodo.nombre_tp,
-        nodo.nombre_tp,
-        []
-      );
-      pregunta.op_de_resp = await getOpcionesDeRespuestaParaPregunta(
-        idABuscar,
-        pregunta.id_pregunta
-      );
+      var pregunta = new Pregunta(nodo.id_pregunta,nodo.nombre_p,nodo.nombre_tp,nodo.nombre_tp,[]);
+      pregunta.op_de_resp = await getOpcionesDeRespuestaParaPregunta(idABuscar,pregunta.id_pregunta);
       if (listaDePreguntas.find((pre) => pre.id_pregunta === pregunta.id_pregunta) == null) {
         listaDePreguntas.push(pregunta);
       }
@@ -95,39 +88,28 @@ async function getOpcionesDeRespuestaParaPregunta(idABuscar, idDeLaPregunta) {
 // peticiones a firebase, FALTA ARREGLAR ESTO
 root.get('/B/listaDeEncuestas', async (req, res) => {
   var listaDeEncuestas = [];
-  var encuestaActual = new Encuesta();
-  dbFire.ref('modelo_encuesta').once('value', (snapshot) => {
-    var encuesta = snapshot.val();
-    if (encuesta != null) {
-      console.log(encuesta);
-      res.status(200).json('ok');
-    }
+  dbFire.ref('modelo_encuesta').once('value').then((snapshot) => {
+    // id_encueta, nombre_e, descripcion, cant_secciones, estado
+    snapshot.forEach((nodo) => {
+      let { nombre_e, descripcion, cant_secciones, estado } = nodo.val();
+      var encuestaActual = new EncuestaSinSeccion(nodo.key, nombre_e, descripcion, cant_secciones, estado);
+      listaDeEncuestas.push(encuestaActual);
+    });
+    res.status(200).json(listaDeEncuestas);
   });
 });
 
-root.get('/B/listaDeEncuestas2', async (req, res) => {
-  var listaDeEncuestas = [];
-  var encuestaActual = new Encuesta();
-  dbFire
-    .ref('modelo_encuesta')
-    .once('value')
-    .then((snapshot) => {
-      //console.log(snapshot.child('-MpNiz0MQhDD20ns3i7e').val());
-        /*snapshot.forEach((s) => {
-            console.log(s.key);
-            console.log(s.exportVal());
-            console.log("-------------------");
-        })*/ 
-      snapshot.forEach((childSnapshot) => {
-        console.log(childSnapshot.val());
-        let { cant_secciones, estado, nombre_e } = childSnapshot.val();
-        console.log(`Secciones: ${cant_secciones}, Estado: ${estado}, Encuesta: ${nombre_e}`);
-        console.log('=============');
-      });
-      /*var x = snapshot.val();
-          console.log(x);*/
-      res.status(200).json('ok');
-    });
+root.get('/B/getEncuesta/:idABuscar', async (req, res) => {
+  const idABuscar = req.params.idABuscar;
+  dbFire.ref('modelo_encuesta').child(idABuscar).once('value').then((snapshot) => {
+    if (snapshot != null) {
+      res.status(200).json(snapshot.val());
+    }else{
+      res.status(500).json({ message: 'La encuesta no existe.' });
+    }
+  });
+
 });
+
 
 module.exports = root;
