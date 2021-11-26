@@ -2,7 +2,7 @@ const root = require("express").Router();
 const { estaLogueado } = require('../helpers/auth');
 
 
-root.get('/', estaLogueado, (req, res) => {
+root.get('/', (req, res) => {
     res.render('index')
 });
 

@@ -29,7 +29,7 @@ class Usuario {
          return bcrypt.hash(passACifrar, salt);
     }
     async desencriptarPass(passADesencriptar) {
-        await bcrypt.compare(passADesencriptar.toString(), this.contraseña)
+        return await bcrypt.compare(passADesencriptar.toString(), this.contraseña)
     }
 }
 module.exports = Usuario;
