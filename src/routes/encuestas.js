@@ -46,7 +46,7 @@ async function getSeccionesEncuesta(idABuscar) {
   );
   if (consulta.rows.length > 0) {
     for (const nodo of consulta.rows) {
-      var seccion = new Seccion(nodo.id_seccion, nodo.nombre_s,nodo.cant_preguntas,[]);
+      var seccion = new Seccion(nodo.id_seccion, nodo.nombre_s, nodo.cant_preguntas, []);
       seccion.preguntas = await getListaPreguntasPorSeccion(idABuscar, seccion.id_seccion);
       if (listaDeSeciones.find((sec) => sec.id_seccion === seccion.id_seccion) == null) {
         listaDeSeciones.push(seccion);
@@ -63,8 +63,8 @@ async function getListaPreguntasPorSeccion(idABuscar, idSeccion) {
   );
   if (consulta.rows.length > 0) {
     for (const nodo of consulta.rows) {
-      var pregunta = new Pregunta(nodo.id_pregunta,nodo.nombre_p,nodo.nombre_tp,nodo.nombre_tp,[]);
-      pregunta.op_de_resp = await getOpcionesDeRespuestaParaPregunta(idABuscar,pregunta.id_pregunta);
+      var pregunta = new Pregunta(nodo.id_pregunta, nodo.nombre_p, nodo.nombre_tp, nodo.nombre_tp, []);
+      pregunta.op_de_resp = await getOpcionesDeRespuestaParaPregunta(idABuscar, pregunta.id_pregunta);
       if (listaDePreguntas.find((pre) => pre.id_pregunta === pregunta.id_pregunta) == null) {
         listaDePreguntas.push(pregunta);
       }
@@ -101,15 +101,30 @@ root.get('/B/listaDeEncuestas', async (req, res) => {
 
 root.get('/B/getEncuesta/:idABuscar', async (req, res) => {
   const idABuscar = req.params.idABuscar;
+  var listaDeSecciones = [];
+  var listaDePreguntas = [];
   dbFire.ref('modelo_encuesta').child(idABuscar).once('value').then((snapshot) => {
     if (snapshot != null) {
-      res.status(200).json(snapshot.val());
-    }else{
+      const { cant_secciones, nombre_e, descripcion, estado, seccion } = snapshot.val();
+      for (const keySeccion in seccion) {
+        for (const keyPregunta in seccion[keySeccion].preguntas) {
+          const nodo = seccion[keySeccion].preguntas[keyPregunta];
+        let preguntaActual = new Pregunta(keyPregunta, nodo.nombre_p, nodo.tipo, nodo.op_de_resp);
+          listaDePreguntas.push(preguntaActual);
+        }
+        var secActual = new Seccion(keySeccion,seccion[keySeccion].nombre_s,seccion[keySeccion].cant_preguntas,listaDePreguntas);
+        listaDePreguntas = [];
+        listaDeSecciones.push(secActual);
+      }
+      const encuesta = new Encuesta(snapshot.key,nombre_e,descripcion,cant_secciones,estado,listaDeSecciones);
+      res.status(200).json(encuesta);
+    } else {
       res.status(500).json({ message: 'La encuesta no existe.' });
     }
   });
 
 });
+
 
 
 module.exports = root;
