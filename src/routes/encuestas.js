@@ -12,6 +12,7 @@ const dbFire = admin.database();
 const Pregunta = require('../models/pregunta');
 const Seccion = require('../models/seccion');
 const { Encuesta, EncuestaSinSeccion } = require('../models/encuesta');
+const OpDeResp = require('../models/op_de_resp');
 
 //listar encuestas
 root.get('/A/listaDeEncuestas', async (req, res) => {
@@ -109,14 +110,20 @@ root.get('/B/getEncuesta/:idABuscar', async (req, res) => {
       for (const keySeccion in seccion) {
         for (const keyPregunta in seccion[keySeccion].preguntas) {
           const nodo = seccion[keySeccion].preguntas[keyPregunta];
-        let preguntaActual = new Pregunta(keyPregunta, nodo.nombre_p, nodo.tipo, nodo.op_de_resp);
+          const id_pregunta = keySeccion + keyPregunta;
+          let preguntaActual = new Pregunta(id_pregunta, nodo.nombre_p, nodo.tipo, []);
+          for (const key in nodo.op_de_resp) {
+            const idOpResp = id_pregunta + key;
+            var opDeRespActual = new OpDeResp(idOpResp, nodo.op_de_resp[key]);
+            preguntaActual.op_de_resp.push(opDeRespActual);
+          }
           listaDePreguntas.push(preguntaActual);
         }
-        var secActual = new Seccion(keySeccion,seccion[keySeccion].nombre_s,seccion[keySeccion].cant_preguntas,listaDePreguntas);
+        var secActual = new Seccion(keySeccion, seccion[keySeccion].nombre_s, seccion[keySeccion].cant_preguntas, listaDePreguntas);
         listaDePreguntas = [];
         listaDeSecciones.push(secActual);
       }
-      const encuesta = new Encuesta(snapshot.key,nombre_e,descripcion,cant_secciones,estado,listaDeSecciones);
+      const encuesta = new Encuesta(snapshot.key, nombre_e, descripcion, cant_secciones, estado, listaDeSecciones);
       res.status(200).json(encuesta);
     } else {
       res.status(500).json({ message: 'La encuesta no existe.' });
