@@ -129,9 +129,25 @@ root.get('/B/getEncuesta/:idABuscar', async (req, res) => {
       res.status(500).json({ message: 'La encuesta no existe.' });
     }
   });
-
 });
 
+root.get('/B/ExisteAplicacionEncuesta/:idAplicacion', async (req, res) => {
+  const idAplicacion = req.params.idAplicacion;
+  dbFire.ref('aplicacion_encuesta').once('value').then((snapshot) => {
+    if (snapshot != null) {
+      for (const key in snapshot.val()) {
+        const nodo = snapshot.val()[key];
+         if (nodo.createAt == idAplicacion) {
+          res.status(200).json(true);
+          return;
+        } 
+      }
+      res.status(500).json(false);
+    } else {
+      res.status(500).json(false);
+    }
+  });
+});
 
 
 module.exports = root;
