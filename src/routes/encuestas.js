@@ -92,8 +92,8 @@ root.get('/B/listaDeEncuestas', async (req, res) => {
   dbFire.ref('modelo_encuesta').once('value').then((snapshot) => {
     // id_encueta, nombre_e, descripcion, cant_secciones, estado
     snapshot.forEach((nodo) => {
-      let { nombre_e, descripcion, cant_secciones, estado } = nodo.val();
-      var encuestaActual = new EncuestaSinSeccion(nodo.key, nombre_e, descripcion, cant_secciones, estado);
+      let { nombre_e,descripcion, cant_aplicaciones, cant_secciones,createAt, fechaLimite, estado,} = nodo.val();
+      var encuestaActual = new EncuestaSinSeccion({id_encuesta: nodo.key, nombre_e,descripcion, cant_aplicaciones, cant_secciones,createAt, fechaLimite, estado});
       listaDeEncuestas.push(encuestaActual);
     });
     res.status(200).json(listaDeEncuestas);
@@ -106,7 +106,7 @@ root.get('/B/getEncuesta/:idABuscar', async (req, res) => {
   var listaDePreguntas = [];
   dbFire.ref('modelo_encuesta').child(idABuscar).once('value').then((snapshot) => {
     if (snapshot != null) {
-      const { cant_secciones, nombre_e, descripcion, estado, seccion } = snapshot.val();
+      const {  nombre_e,descripcion, cant_aplicaciones, cant_secciones,createAt, fechaLimite, estado, seccion } = snapshot.val();
       for (const keySeccion in seccion) {
         for (const keyPregunta in seccion[keySeccion].preguntas) {
           const nodo = seccion[keySeccion].preguntas[keyPregunta];
@@ -123,7 +123,7 @@ root.get('/B/getEncuesta/:idABuscar', async (req, res) => {
         listaDePreguntas = [];
         listaDeSecciones.push(secActual);
       }
-      const encuesta = new Encuesta(snapshot.key, nombre_e, descripcion, cant_secciones, estado, listaDeSecciones);
+      const encuesta = new Encuesta({nombre_e,descripcion, cant_aplicaciones, cant_secciones,createAt, fechaLimite, estado, seccion: listaDeSecciones});
       res.status(200).json(encuesta);
     } else {
       res.status(500).json({ message: 'La encuesta no existe.' });
