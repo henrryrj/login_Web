@@ -5,9 +5,11 @@ const override = require('method-override');
 const session = require('express-session');
 const flash = require('connect-flash');
 const passport = require('passport');
+
 //inicializacion
 const app = express();
 require('./database');
+require('./firebase');
 require('./config/passport');
 
 //settings
@@ -19,6 +21,26 @@ app.engine('.hbs', exphbs({
     layoutsDir: path.join(app.get('views'), 'layouts'),
     partialsDir: path.join(app.get('views'), 'partials'),
     extname: '.hbs',
+    helpers: {
+        // Function to do basic mathematical operation in handlebar
+        math: function(lvalue, operator, rvalue) {
+            lvalue = parseFloat(lvalue);
+            rvalue = parseFloat(rvalue);
+            return {
+                "+": lvalue + rvalue,
+                "-": lvalue - rvalue,
+                "*": lvalue * rvalue,
+                "/": lvalue / rvalue,
+                "%": lvalue % rvalue
+            }[operator];
+        },
+        esIgual: function (a, b, opts){
+            return a == b ? opts.fn(this) : opts.inverse(this);
+        },
+        esDiferente: function (a, b, opts){
+            return a != b ? opts.fn(this) : opts.inverse(this);
+        }
+    }
 }));
 app.set('view engine', '.hbs');
 
@@ -46,6 +68,7 @@ app.use((req, res, next) => {
 //routes
 app.use(require('./routes/index'));
 app.use(require('./routes/users'));
+app.use('/encuestas/',require('./routes/encuesta'));
 app.use('/API/encuestas/',require('./routes/encuestas'));
 
 //static files

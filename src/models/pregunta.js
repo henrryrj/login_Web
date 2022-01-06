@@ -6,4 +6,5 @@ class Pregunta{
         this.op_de_resp = L1;
     }
 }
-module.exports = Pregunta;
+module.exports = Pregunta; 
+

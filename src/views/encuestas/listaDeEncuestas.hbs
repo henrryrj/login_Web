@@ -1,0 +1,42 @@
+<div class="container">
+    <div class="table-responsive">
+        <table class="table table-striped">
+
+            <head class="thead-light">
+                <th scope="col" class="border">#</th>
+                <th scope="col" class="text-center">Nombre Encuesta</th>
+                <th scope="col" class="text-center">Aplicaciones</th>
+                <th scope="col" class="text-center">Secciones</th>
+                <th scope="col" class="text-center">Fecha Creación</th>
+                <th scope="col" class="text-center">Fecha límite</th>
+                <th scope="col" class="text-center">Acciones</th>
+            </head>
+            {{#each encuestas}}
+
+            <body>
+                <tr>
+                    <th class="border">{{id_encuesta}}
+                    <td class="text-center "><label for="text">{{nombre_e}}</label>
+                    </td>
+                    <td class="text-center "><label for="text">{{cant_aplicaciones}}</label></td>
+                    <td class="text-center "><label for="text">{{cant_secciones}}</label></td>
+                    <td class="text-center "><label for="text">{{createAt}}</label>
+                    </td>
+                    <td class="text-center "><label for="text">{{fechaLimite}}</label>
+                    </td>
+                    <td class="text-center ">
+                        <button class="btn btn-success" type="button" data-bs-toggle="modal"
+                            data-bs-target="#add-pre-{{id_seccion}}">Ver Encuesta</button>
+                        <button type="button" class="btn btn-primary" id="btnEditSeccion" data-bs-toggle="modal"
+                            data-bs-target="#edit-modal-{{id_seccion}}">
+                            Edit. Encuesta
+                        </button>
+                        <a href="/encuestas/delSeccion/{{id_seccion}}" class="btn btn-danger">Del. Encuesta</a>
+                    </td>
+                    </th>
+                </tr>
+            </body>
+            {{/each}}
+        </table>
+    </div>
+</div>

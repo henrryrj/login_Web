@@ -1,0 +1,218 @@
+<div class="col-md-12 mx-auto">
+    <div class="card">
+        <div class="card-header">
+            <h2>Crear Encuesta</h2>
+        </div>
+        <form action="/encuestas/getDatosEncuesta" method="POST" name="formPrincipal">
+            <div class="card-body">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col md-4 mx-auto">
+                            <br>
+                            <label for="text">Nombre de la encuesta </label>
+                            <input type="text" name="nombre_e" class="form-control input-sm" value="{{nombre_e}}" />
+                            <br>
+                            <label for="text">Descripcion</label>
+                            <textarea type="text" name="descripcion"
+                                class="form-control input-sm">{{descripcion}}</textarea>
+                        </div>
+                        <div class="col md-4 mx-auto">
+                            <label for="text">Cant. Aplicaciones </label>
+                            <input type="text" name="cant_aplicaciones" class="form-control input-sm"
+                                value="{{cant_aplicaciones}}" />
+                            <br>
+                            <label for="text">Cant. Secciones </label>
+                            <input type="text" name="cant_seccion" class="form-control input-sm"
+                                value="{{cant_seccion}}" />
+                        </div>
+                    </div>
+                    <br>
+
+                    <div class="row d-flex justify-content-between align-items-center">
+                        <div class="col md-4 mx-auto">
+                            <label for="text" class="border">Fecha Limite: </label>
+                            <input type="date" name="fechaLimite" class="form-control input-sm"
+                                value="{{fechaLimite}}" />
+                        </div>
+                        <div class="col md-4">
+                            <br>
+                            <div class="form-group p-4">
+                                <button type="submit" class="btn btn-success btn-block" id="btnSeccion">Add
+                                    Seccion</button>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="container">
+                        <div class="card">
+                            <div class=" card-header">
+                                <h1>Secciones</h1>
+                            </div>
+                            <div class="container">
+                                <div class="row align-items-center">
+                                    <div class="col md-4 mx-auto">
+                                        <br>
+                                        <label for="text">Nombre de la Seccion </label>
+                                        <input type="text" name="nombre_s" class="form-control input-sm"
+                                            value="{{nombre_s}}" />
+                                    </div>
+                                    <div class="col md-4 mx-auto">
+                                        <br>
+                                        <label for="text">Cant. de preguntas </label>
+                                        <input type="text" name="cant_preguntas" class="form-control input-sm"
+                                            value="{{cant_preguntas}}" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                {{#if secciones}}
+                                <div class="container">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <head class="thead-light">
+                                                <th scope="col" class="border">#</th>
+                                                <th scope="col" class="text-center">Nombre Seccion</th>
+                                                <th scope="col" class="text-center">Cant. de Preguntas</th>
+                                                <th scope="col" class="text-center">Preguntas</th>
+                                                <th scope="col" class="text-center">Acciones</th>
+                                            </head>
+                                            {{#each secciones}}
+                                            <body>
+                                                <tr>
+                                                    <th class="border">{{id_seccion}}
+                                                    <td class="text-center "><label for="text">{{nombre_s}}</label>
+                                                    </td>
+                                                    <td class="text-center "><label
+                                                            for="text">{{cant_preguntas}}</label></td>
+                                                    {{#if this.preguntas}}
+                                                    <td class="text-center ">
+                                                        <a href="/encuestas/listaDePreguntas/{{id_seccion}}"
+                                                            class="btn btn-info btn-sm">Ver Preguntas</a>
+                                                    </td>
+                                                    {{else}}
+                                                    <td class="text-center ">
+                                                        <p>no hay preguntas</p>
+                                                    </td>
+                                                    {{/if}}
+                                                    <td class="text-center ">
+                                                        <button class="btn btn-success" type="button"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#add-pre-{{id_seccion}}">Add.
+                                                            Pregunta</button>
+                                                        <button type="button" class="btn btn-primary"
+                                                            id="btnEditSeccion" data-bs-toggle="modal"
+                                                            data-bs-target="#edit-modal-{{id_seccion}}">
+                                                            Edit. Sec
+                                                        </button>
+                                                        <a href="/encuestas/delSeccion/{{id_seccion}}"
+                                                            class="btn btn-danger">Del. Sec</a>
+                                                    </td>
+                                                    </th>
+                                                </tr>
+                                                <!--ADD PREGUNTAS MODAL-->
+                                                <div class="modal fade" id="add-pre-{{id_seccion}}" tabindex="-1"
+                                                    role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"
+                                                    data-bs-backdrop="static">
+                                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="exampleModalLabel">
+                                                                    Add.
+                                                                    pregunta/Seccion: {{id_seccion}}
+                                                                </h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <label for="nombre">Escriba la Pregunta</label>
+                                                                <input class="form-control" type="text" name="nombre_p"
+                                                                    placeholder="Pregunta" id="nombrePregunta-{{id_seccion}}">
+                                                                <label for="nombre">Seleccione el tipo de
+                                                                    pregunta</label>
+
+                                                                <select class="form-select" name="tipo" id="select-tipo-{{id_seccion}}"
+                                                                    onchange="cambiarTipo({{id_seccion}})">
+                                                                    <option value="cerrada">cerrada</option>
+                                                                    <option value="multiple">múltiple</option>
+                                                                    <option value="abierta">Abierta</option>
+
+                                                                </select>
+                                                                <br>
+                                                                <input type="text" name="opDeResp"
+                                                                    id="nombreOption-id-{{id_seccion}}"
+                                                                    placeholder="Nombre de la opcion">
+                                                                <button type="button" class="btn btn-success"
+                                                                    id="addButton-{{id_seccion}}" onclick="addOption({{id_seccion}})">Añadir
+                                                                    Respuesta</button>
+                                                                <div id="respuestas-id-{{id_seccion}}" class="d-flex flex-column">
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-primary" id="btnAddPregunta-{{id_seccion}}" onclick="enviarPregunta({{id_seccion}})">Guardar Pregunta</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- EDITAR SECCION MODAL-->
+                                                <div class="modal fade" id="edit-modal-{{id_seccion}}" tabindex="-1"
+                                                    aria-labelledby="exampleModalLabel" aria-hidden="true"
+                                                    data-bs-backdrop="static">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Editar Seccion</h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="container">
+                                                                    <div class="row align-items-center">
+                                                                        <div class="col md-4 mx-auto">
+                                                                            <br>
+                                                                            <label for="text">Nombre de la Seccion
+                                                                            </label>
+                                                                            <input type="text" name="editNombre_s"
+                                                                                class="form-control input-sm"
+                                                                                value="{{nombre_s}}" />
+                                                                        </div>
+                                                                        <div class="col md-4 mx-auto">
+                                                                            <br>
+                                                                            <label for="text">Cant. de preguntas
+                                                                            </label>
+                                                                            <input type="text" name="editCant_preguntas"
+                                                                                class="form-control input-sm"
+                                                                                value="{{cant_preguntas}}" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button"
+                                                                    onclick="cambiarAction({{id_seccion}})"
+                                                                    id="btnEditSeccion" class="btn btn-primary">Guardar
+                                                                    cambios</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </body>
+                                            {{/each}}
+                                        </table>
+                                    </div>
+                                </div>
+                                {{else}}
+                                <p>No hay secciones aun.</p>
+                                {{/if}}
+                            </div>
+
+                            <div class="card-footer">
+                            </div>
+                        </div>
+                        <div class="form-group p-4">
+                            <button class="btn btn-success btn-block" type="button" onclick="save()">
+                                Guardar Encuesta
+                            </button>
+                        </div>
+        </form>
+    </div>
+</div>

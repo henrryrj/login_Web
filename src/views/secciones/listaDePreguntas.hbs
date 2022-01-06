@@ -1,0 +1,181 @@
+<form action="/encuestas/getDatosEncuesta" method="POST" name="formPrincipal">
+    <div class="container">
+        <div class="table-responsive">
+            <table class="table table-striped">
+
+                <head class="thead-light">
+                    <th scope="col" class="border">#</th>
+                    <th scope="col" class="text-center">Pregunta</th>
+                    <th scope="col" class="text-center">Tipo</th>
+                    <th scope="col" class="text-center">Opciones</th>
+                    <th scope="col" class="text-center">Acciones</th>
+                </head>
+                {{#each preguntas}}
+
+                <body>
+                    <tr>
+                        <th class="border">{{math @index "+" 1}}
+                        <td class="text-center "><label for="text">{{nombre_p}}</label>
+                        </td>
+                        <td class="text-center "><label for="text">{{tipo}}</label></td>
+                        {{#if this.op_de_resp}}
+                        <td class="text-center ">
+                            <button type="button" class="btn btn-info btn-sm" id="btnEditSeccion" data-bs-toggle="modal"
+                                data-bs-target="#verOp-modal-{{math @index " +" 1}}">
+                                Ver opciones
+                            </button>
+                        </td>
+                        {{else}}
+                        <td class="text-center ">
+                            <p>no tiene opciones</p>
+                        </td>
+                        {{/if}}
+                        <td class="text-center ">
+                            {{!-- <button type="button" class="btn btn-primary" id="btnEditSeccion" data-bs-toggle="modal"
+                                data-bs-target="#editPregu-modal-{{this.id_pregunta}}">
+                                Edit. Pregunta
+                            </button> --}}
+                            <a href="/encuestas/delPregunta/{{../sec}}/{{math @index "+" 1}}"
+                                class="btn btn-danger">Del.
+                                Preg</a>
+                        </td>
+                        </th>
+                    </tr>
+                    <!--ADD PREGUNTAS MODAL-->
+                    <div class="modal fade" id="editPregu-modal-{{this.id_pregunta}}" tabindex="-1" role="dialog"
+                        aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">
+                                        Edit.
+                                        pregunta: {{this.id_pregunta}} / Seccion:{{../sec}}
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <label for="nombre">Escriba la Pregunta</label>
+                                    <input class="form-control" type="text" name="nombre_p" placeholder="Pregunta"
+                                        id="nombrePregunta-{{this.id_pregunta}}" value="{{this.nombre_p}}">
+                                    <label for="nombre">Seleccione el tipo de
+                                        pregunta</label>
+
+                                    <select class="form-select" name="tipo" id="select-tipo-{{this.id_pregunta}}"
+                                        onchange="cambiarTipo({{this.id_pregunta}})">
+                                        {{#esIgual this.tipo "cerrada"}}
+                                        <option value="cerrada">cerrada</option>
+                                        <option value="multiple">múltiple</option>
+                                        <option value="abierta">Abierta</option>
+                                        {{/esIgual}}
+                                        {{#esIgual this.tipo "multiple"}}
+                                        <option value="multiple">multiple</option>
+                                        <option value="cerrada">cerrada</option>
+                                        <option value="abierta">Abierta</option>
+                                        {{/esIgual}}
+                                        {{#esIgual this.tipo "abierta"}}
+                                        <option value="abierta">Abierta</option>
+                                        <option value="multiple">múltiple</option>
+                                        <option value="cerrada">cerrada</option>
+                                        {{/esIgual}}
+
+                                    </select>
+                                    <br>
+                                    <input type="text" name="opDeResp" id="nombreOption-id-{{this.id_pregunta}}"
+                                        placeholder="Nombre de la opcion">
+                                    <button type="button" class="btn btn-success" id="addButton-{{this.id_pregunta}}"
+                                        onclick="addOption2({{this.id_pregunta}})">Añadir
+                                        Respuesta</button>
+                                    <div id="respuestas-id-{{this.id_pregunta}}" class="d-flex flex-column">
+                                        {{#esDiferente this.tipo "abierta"}}
+                                        <ul class="list-group">
+                                            {{#esIgual this.tipo "cerrada"}}
+                                            {{#each this.op_de_resp}}
+                                            <li class="list-group-item">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio"
+                                                        name="flexRadioDisabled" id="flexRadioDisabled" disabled>
+                                                    <label class="form-check-label" for="flexRadioDefault1">
+                                                        {{this}}
+                                                    </label>
+                                                </div>
+                                            </li>
+                                            {{/each}}
+                                            {{/esIgual}}
+                                            {{#esIgual this.tipo "multiple"}}
+                                            {{#each op_de_resp}}
+                                            <li class="list-group-item">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" value=""
+                                                        id="flexCheckDisabled" disabled>
+                                                    <label class="form-check-label" for="flexCheckDefault">
+                                                        {{this}}
+                                                    </label>
+                                                </div>
+                                            </li>
+                                            {{/each}}
+                                            {{/esIgual}}
+                                        </ul>
+                                        {{/esDiferente}}
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary"
+                                        id="btnAddPregunta-{{this.id_pregunta}}"
+                                        onclick="enviarCambiosPregunta({{../sec}},{{this.id_pregunta}})">Guardar cambios</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--OPCIONES-MODAL-->
+                    <div class="modal fade" id="verOp-modal-{{math @index " +" 1}}" tabindex="-1"
+                        aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Opciones de pregunta : {{math @index "+" 1}}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="container">
+                                        <ul class="list-group">
+                                            {{#esIgual this.tipo "cerrada"}}
+                                            {{#each this.op_de_resp}}
+                                            <li class="list-group-item">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio"
+                                                        name="flexRadioDisabled" id="flexRadioDisabled" disabled>
+                                                    <label class="form-check-label" for="flexRadioDefault1">
+                                                        {{this}}
+                                                    </label>
+                                                </div>
+                                            </li>
+                                            {{/each}}
+                                            {{/esIgual}}
+                                            {{#esIgual this.tipo "multiple"}}
+                                            {{#each op_de_resp}}
+                                            <li class="list-group-item">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" value=""
+                                                        id="flexCheckDisabled" disabled>
+                                                    <label class="form-check-label" for="flexCheckDefault">
+                                                        {{this}}
+                                                    </label>
+                                                </div>
+                                            </li>
+                                            {{/each}}
+                                            {{/esIgual}}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                {{/each}}
+            </table>
+        </div>
+    </div>
+</form>

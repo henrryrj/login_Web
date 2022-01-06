@@ -1,14 +1,6 @@
 const root = require('express').Router();
 const pgAdmin = require('../database');
-const admin = require('firebase-admin');
-var serviceAccount = require('../../encuestasapp-e3fc3-firebase-adminsdk-47zop-d135672a22.json');
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://encuestasapp-e3fc3-default-rtdb.firebaseio.com/',
-});
-
-const dbFire = admin.database();
-
+const dbFire  = require('../firebase');
 const Pregunta = require('../models/pregunta');
 const Seccion = require('../models/seccion');
 const { Encuesta, EncuestaSinSeccion } = require('../models/encuesta');
