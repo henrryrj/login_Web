@@ -1,8 +1,8 @@
 const root = require('express').Router();
 const Pregunta = require('../models/pregunta');
 const Seccion = require('../models/seccion');
-const { Encuesta }= require('../models/encuesta');
-const dbFire  = require('../firebase');
+const { Encuesta } = require('../models/encuesta');
+const dbFire = require('../firebase');
 
 
 
@@ -44,13 +44,13 @@ root.get('/newEncuesta', (req, res) => {
 root.post('/getDatosEncuesta', (req, res) => {
     const errores = [];
     const { nombre_e, descripcion, cant_aplicaciones, cant_seccion, fechaLimite, nombre_s, cant_preguntas } = req.body;
-    if (nombre_e === "") errores.push({ text: "Ingrese un nombre de encuesta" });
+/*     if (nombre_e === "") errores.push({ text: "Ingrese un nombre de encuesta" });
     if (descripcion === "") errores.push({ text: "Ingrese una descripcion a la encuesta" });
     if (cant_aplicaciones === "") errores.push({ text: "Ingrese la cant. de aplicaiones" });
     if (isNaN(cant_aplicaciones)) errores.push({ text: "cant. de apli. no valido (debe ser num.)" });
     if (cant_seccion === "") errores.push({ text: "Ingrese la cant. de secciones" });
     if (isNaN(cant_seccion)) errores.push({ text: "cant. de seccion no valido (debe ser num.)" });
-    if (fechaLimite === "") errores.push({ text: "Ingrese la fecha limite" });
+    if (fechaLimite === "") errores.push({ text: "Ingrese la fecha limite" }); */
     if (nombre_s === "") errores.push({ text: "Ingrese un nombre a la seccion" });
     if (cant_preguntas === "") errores.push({ text: "Ingrese la cant. de preguntas" });
     if (isNaN(cant_preguntas)) errores.push({ text: "Cant. de preguntas no valido (debe ser num.)" });
@@ -67,15 +67,22 @@ root.post('/getDatosEncuesta', (req, res) => {
         idSeccion = idSeccion + 1;
         seccionActual = new Seccion(idSeccion, nombre_s, cant_preguntas, []);
         modeloEncuesta.seccion.push(seccionActual);
-
         res.render('encuestas/newEncuesta', { nombre_e, descripcion, cant_aplicaciones, cant_seccion, fechaLimite, secciones: modeloEncuesta.seccion });
     }
 });
 
-root.post('/save',(req,res)=>{
+root.post('/save', (req, res) => {
+    const { nombre_e, descripcion, cant_aplicaciones, cant_seccion, fechaLimite, nombre_s, cant_preguntas } = req.body;
+    modeloEncuesta.nombre_e = nombre_e;
+    modeloEncuesta.descripcion = descripcion;
+    modeloEncuesta.cant_aplicaciones = cant_aplicaciones;
+    modeloEncuesta.cant_secciones = cant_seccion;
+    modeloEncuesta.fechaLimite = fechaLimite;
+    modeloEncuesta.createAt = fecha();
+    modeloEncuesta.estado = true;
+    delete modeloEncuesta.id_encuesta;
     dbFire.ref('modelo_encuesta').push(modeloEncuesta);
     res.render('index')
-    
 })
 root.post('/editSeccion/:idSeccion', (req, res) => {
     const errores = [];
@@ -131,7 +138,7 @@ root.post('/getDatosPregunta/:idSeccion', (req, res) => {
 
     if (nombre_p === "") errores.push({ text: "Ingrese el nombre de la pregunta" });
     if (nombreAGuardar === "") errores.push({ text: "Ingrese el nombre de la pregunta" });
-    if (listaDeOp.length == 0 && tipo != "abierta") errores.push({ text: "debe añadir opciones de resp" });
+  /*   if (listaDeOp.length == 0 && tipo != "abierta") errores.push({ text: "debe añadir opciones de resp" }); */
     if (errores.length > 0) {
         res.render('encuestas/newEncuesta', { errores, secciones: modeloEncuesta.seccion });
     } else {
@@ -224,8 +231,8 @@ function getCantPreguntas(idSec) {
 function veriPreguntas() {
     for (let i = 0; i < modeloEncuesta.seccion.length; i++) {
         for (let j = 0; j < modeloEncuesta.seccion[i].preguntas.length; j++) {
-            let pregunta =  modeloEncuesta.seccion[i].preguntas[j];
-            if(pregunta.length== 0) return true;
+            let pregunta = modeloEncuesta.seccion[i].preguntas[j];
+            if (pregunta.length == 0) return true;
         }
     }
     return false;
