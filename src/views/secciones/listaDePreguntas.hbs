@@ -14,7 +14,7 @@
 
                 <body>
                     <tr>
-                        <th class="border">{{math @index "+" 1}}
+                        <th class="border">{{this.id_pregunta}}
                         <td class="text-center "><label for="text">{{nombre_p}}</label>
                         </td>
                         <td class="text-center "><label for="text">{{tipo}}</label></td>
@@ -35,7 +35,7 @@
                                 data-bs-target="#editPregu-modal-{{this.id_pregunta}}">
                                 Edit. Pregunta
                             </button> --}}
-                            <a href="/encuestas/delPregunta/{{../sec}}/{{math @index "+" 1}}"
+                            <a href="/encuestas/delPregunta/{{../sec}}/{{this.id_pregunta}}"
                                 class="btn btn-danger">Del.
                                 Preg</a>
                         </td>

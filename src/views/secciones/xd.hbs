@@ -1,0 +1,108 @@
+<li class="list-group-item">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="flexRadioDisabled" id="flexRadioDisabled" disabled>
+        <label class="form-check-label" for="flexRadioDefault1">
+            {{this}}
+        </label>
+    </div>
+</li>
+
+
+
+
+<li class="list-group-item">
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="flexCheckDisabled" disabled>
+        <label class="form-check-label" for="flexCheckDefault">
+            {{this}}
+        </label>
+    </div>
+</li>
+
+<div class="d-flex flex-nowrap bd-highlight">
+    <div class="order-1 p-2 bd-highlight">
+        <input type="radio" class="form-check-input" disabled=true>
+
+    </div>
+    <div class="order-2 p-2 bd-highlight">
+        <input type="text" class="form-control input-sm" name="opActual" value="{{this.op_de_resp}}">
+    </div>
+    <div class="order-3 p-2 bd-highlight">
+        <button class="btn-btn-danger" type="button"> Del Op</button>
+    </div>
+</div>
+
+<a href="/encuestas/delSeccion/{{this.id_seccion}}" class="btn btn-danger">Del. Sec</a>
+
+
+
+
+
+
+
+
+
+<div class="modal fade" id="editPregu-modal-{{../this.id_seccion}}-{{this.id_pregunta}}" tabindex="-1" role="dialog"
+    aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">
+                    Seccion:{{../id_seccion}} Pregunta:
+                    {{this.id_pregunta}}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="nombre">Escriba la Pregunta</label>
+                <input class="form-control" type="text" name="nombre_p" placeholder="Pregunta"
+                    id="nombrePregunta-{{this.id_pregunta}}" value="{{this.nombre_p}}">
+                <label for="nombre">Seleccione el tipo de
+                    pregunta</label>
+
+                <select class="form-select" name="tipo" id="select-tipo-{{this.id_pregunta}}"
+                    onchange="cambiarTipo({{this.id_pregunta}})">
+                    <option value="cerrada">cerrada</option>
+                    <option value="multiple">múltiple</option>
+                    <option value="abierta">Abierta</option>
+
+                </select>
+                <br>
+                <div class="row d-flex justify-content-between align-items-center">
+                    <div class="col md-4">
+                        <input type="text" name="opDeResp" class="form-control input-sm"
+                            id="nombreOption-id-{{id_seccion}}" placeholder="Nombre de la opcion">
+                    </div>
+                    <div class="col md-4 mx-auto">
+                        <button type="button" class="btn btn-success" id="addButton-{{id_seccion}}"
+                            onclick="addOption({{id_seccion}})">Añadir
+                            Respuesta</button>
+                    </div>
+                </div>
+                <br>
+                <div id="respuestas-id-{{id_seccion}}" class="col md-4 mx-auto">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnAddPregunta-{{id_seccion}}"
+                    onclick="enviarPregunta({{id_seccion}})">Guardar
+                    Pregunta</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="col md-4 mx-auto">
+    <label for="text">Tipo de Medida</label>
+    <select class="form-select" name="tipoMedida" aria-label="Default select example" id="tipoMedida">
+        <option selected value="seleccionar">-seleccionar-</option>
+        <option value="Lejos">Lejos</option>
+        <option value="Cerca">Cerca</option>
+        <option value="Lejos-Cerca">Lejos - Cerca</option>
+    </select>
+
+    <dir id="contenedorTextArea-{{../id_seccion}}-{{this.id_pregunta}}">
+        <textarea name="respuestas" class="from-control" id="textArea-{{../id_seccion}}-{{this.id_pregunta}}"></textarea>
+    </dir>
+{{!-- //req.flash('error', 'Ingrese el nombre de la opcion'); --}}

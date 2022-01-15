@@ -98,6 +98,7 @@ root.get('/B/getEncuesta/:idABuscar', async (req, res) => {
   var listaDePreguntas = [];
   dbFire.ref('modelo_encuesta').child(idABuscar).once('value').then((snapshot) => {
     if (snapshot != null) {
+      let idEncuesta=  snapshot.key;
       const {  nombre_e,descripcion, cant_aplicaciones, cant_secciones,createAt, fechaLimite, estado, seccion } = snapshot.val();
       for (const keySeccion in seccion) {
         for (const keyPregunta in seccion[keySeccion].preguntas) {
@@ -115,7 +116,7 @@ root.get('/B/getEncuesta/:idABuscar', async (req, res) => {
         listaDePreguntas = [];
         listaDeSecciones.push(secActual);
       }
-      const encuesta = new Encuesta({nombre_e,descripcion, cant_aplicaciones, cant_secciones,createAt, fechaLimite, estado, seccion: listaDeSecciones});
+      const encuesta = new Encuesta({id_encuesta: idEncuesta,nombre_e,descripcion, cant_aplicaciones, cant_secciones,createAt, fechaLimite, estado, seccion: listaDeSecciones});
       res.status(200).json(encuesta);
     } else {
       res.status(500).json({ message: 'La encuesta no existe.' });
