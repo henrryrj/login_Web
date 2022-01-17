@@ -83,7 +83,7 @@ root.post('/save', (req, res) => {
         modeloEncuesta.createAt = fecha();
         modeloEncuesta.fechaLimite = fechaLimite;
         modeloEncuesta.estado = true;
-        //delete modeloEncuesta.id_encuesta;
+        delete modeloEncuesta.id_encuesta;
         parsearEncuesta();
         dbFire.ref('modelo_encuesta').push(modeloEncuesta);
         res.render('encuestas/listaDeEncuestas');

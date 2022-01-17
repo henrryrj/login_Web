@@ -197,9 +197,9 @@
 
                             {{!-- AQUI VIENE LA CARD DE LAS PREGUNTAS --}}
                             <div class="card-footer">
-                    {{#if secciones}}
-                        {{#each secciones}}
-                            {{#if preguntas}}
+                                {{#if secciones}}
+                                {{#each secciones}}
+                                {{#if preguntas}}
                                 <div class=" card-header">
                                     <h3>Preguntas de la Seccion {{this.id_seccion}}</h3>
                                 </div>
@@ -370,7 +370,7 @@
                                                                     <div id="respuestas-id-{{../id_seccion}}-{{this.id_pregunta}}"
                                                                         class="col md-4 mx-auto">
                                                                         {{#esDiferente this.tipo "abierta"}}
-                                                                        {{#esIgual this.tipo "cerrada"}}
+                                                                        {{#esIgual this.tipo "simple"}}
                                                                         {{#each this.op_de_resp}}
                                                                         <div class="d-flex flex-nowrap bd-highlight"
                                                                             id='{{../../id_seccion}}{{../this.id_pregunta}}{{math @index "+" 1}}'>
@@ -433,11 +433,11 @@
                                         </div>
                                     </div>
                                 </div>
-                            {{else}}
+                                {{else}}
                                 <p>Seccion {{this.id_seccion}} sin preguntas</p>
-                            {{/if}}
-                        {{/each}}
-                    {{/if}}
+                                {{/if}}
+                                {{/each}}
+                                {{/if}}
                             </div>
                         </div>
                     </div>

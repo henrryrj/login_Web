@@ -6,6 +6,7 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const passport = require('passport');
 
+
 //inicializacion
 const app = express();
 require('./database');
@@ -70,7 +71,6 @@ app.use(require('./routes/index'));
 app.use(require('./routes/users'));
 app.use('/encuestas/',require('./routes/encuesta'));
 app.use('/API/encuestas/',require('./routes/encuestas'));
-
 //static files
 app.use(express.static(path.join(__dirname, 'public')));
 
