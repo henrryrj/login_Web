@@ -67,6 +67,7 @@ root.get('/editEncuesta/:idEncuesta', async (req, res) => {
     } else {
         dbFire.ref('modelo_encuesta').child(idEncuestaAEditar).once('value').then((snapshot) => {
             let idEncuesta = snapshot.key;
+            let estadoE = '';
             const { nombre_e, descripcion, cant_aplicaciones, cant_secciones, createAt, fechaLimite, estado, seccion } = snapshot.val();
             for (const keySeccion in seccion) {
                 let idSeccion = parseInt(keySeccion) + 1;
@@ -84,14 +85,26 @@ root.get('/editEncuesta/:idEncuesta', async (req, res) => {
                 listaDeSecciones.push(secActual);
             }
             modeloEncuesta = new Encuesta({ id_encuesta: idEncuesta, nombre_e, descripcion, cant_aplicaciones, cant_secciones, createAt, fechaLimite, estado, seccion: listaDeSecciones });
-            console.log(JSON.stringify(modeloEncuesta.seccion));
             idSeccion = getCantSecciones();
-            res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+            if (estado) {
+                estadoE = "true";
+            } else {
+                estadoE = "false";
+            }
+            res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado: estadoE, secciones: modeloEncuesta.seccion });
         });
     }
 });
 
-root.get('/deleteEncuesta/:idEncuesta', async(req, res) => {
+const setEstado = (estadoE) => {
+    if (estadoE === "true") {
+        modeloEncuesta.estado = true;
+    } else {
+        modeloEncuesta.estado = false;
+    }
+}
+
+root.get('/deleteEncuesta/:idEncuesta', async (req, res) => {
     const idEncuestaAEditar = req.params.idEncuesta;
     const urlVeriAplicacion = `https://encuesta-login-web.herokuapp.com/API/encuestas/B/tieneAplicacion/${idEncuestaAEditar}`;
     var headers = { 'Content-Type': 'application/json' };
@@ -101,7 +114,7 @@ root.get('/deleteEncuesta/:idEncuesta', async(req, res) => {
     if (bool) {
         req.flash('error', 'No se puede eliminar la encuesta porque tiene apliaciones');
         res.redirect('/encuestas/listaEncuestas');
-    }else{
+    } else {
         dbFire.ref('modelo_encuesta').child(idEncuestaAEditar).remove();
         req.flash('msg', 'La encuesta se ha eliminado');
         res.redirect('/encuestas/listaEncuestas');
@@ -135,23 +148,23 @@ root.post('/getDatosEncuesta', (req, res) => {
 
 root.post('/getDatosEditEncuestas', (req, res) => {
     const errores = [];
-    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite, nombre_s, } = req.body;
+    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado, nombre_s } = req.body;
+    console.log(req.body);
     if (nombre_s === "" || nombre_s.length == 0) errores.push({ text: "Ingrese un nombre a la seccion" });
     if (errores.length > 0) {
-        res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+        res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado, secciones: modeloEncuesta.seccion });
     } else {
         modeloEncuesta.nombre_e = nombre_e;
         modeloEncuesta.descripcion = descripcion;
         modeloEncuesta.cant_aplicaciones = cant_aplicaciones;
         modeloEncuesta.fechaLimite = fechaLimite;
         modeloEncuesta.createAt = fecha();
-        modeloEncuesta.estado = true;
         idSeccion = getCantSecciones() + 1;
         seccionActual = new Seccion(idSeccion, nombre_s, 0, []);
         modeloEncuesta.cant_secciones = idSeccion;
         modeloEncuesta.seccion.push(seccionActual);
         console.log(modeloEncuesta.id_encuesta);
-        res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+        res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado, secciones: modeloEncuesta.seccion });
     }
 });
 
@@ -185,7 +198,7 @@ root.post('/save', (req, res) => {
 
 root.post('/saveEditEncuesta', (req, res) => {
     const errores = [];
-    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite } = req.body;
+    const { nombre_e, descripcion, cant_aplicaciones, estado, fechaLimite } = req.body;
     if (nombre_e === "" || nombre_e.length == 0) errores.push({ text: "Ingrese un nombre de encuesta" });
     if (descripcion === "" || descripcion.length == 0) errores.push({ text: "Ingrese una descripcion a la encuesta" });
     if (cant_aplicaciones === "" || cant_aplicaciones < 0) errores.push({ text: "Ingrese la cant. de aplicaiones" });
@@ -194,7 +207,7 @@ root.post('/saveEditEncuesta', (req, res) => {
     if (seccionesSinPreguntas()) errores.push({ text: "Hay secciones sin preguntas, verifique..." });
     if (errores.length > 0) {
         console.log(errores);
-        res.render('encuestas/newEncuesta', { errores, nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+        res.render('encuestas/editEncuesta', { errores, nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado, secciones: modeloEncuesta.seccion });
     } else {
         modeloEncuesta.nombre_e = nombre_e;
         modeloEncuesta.descripcion = descripcion;
@@ -202,7 +215,7 @@ root.post('/saveEditEncuesta', (req, res) => {
         modeloEncuesta.cant_secciones = parseInt(getCantSecciones());
         modeloEncuesta.createAt = fecha();
         modeloEncuesta.fechaLimite = fechaLimite;
-        modeloEncuesta.estado = true;
+        setEstado(estado);
         const id_encuesta = modeloEncuesta.id_encuesta;
         delete modeloEncuesta.id_encuesta;
         dbFire.ref('modelo_encuesta').child(id_encuesta).set(modeloEncuesta);
@@ -241,7 +254,7 @@ root.post('/editSeccion/:idSeccion', (req, res) => {
 });
 root.post('/editSeccionEncuesta/:idSeccion', (req, res) => {
     const errores = [];
-    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite } = req.body;
+    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado } = req.body;
     const idAEditar = req.params.idSeccion;
     const { editNombre_s } = req.body;
     const nombreAEditar = editNombre_s[idAEditar - 1];
@@ -251,7 +264,7 @@ root.post('/editSeccionEncuesta/:idSeccion', (req, res) => {
         if (editNombre_s === "" || nombreAEditar.length == 0) errores.push({ text: "Ingrese un nombre a la seccion" });
     }
     if (errores.length > 0) {
-        res.render('encuestas/editEncuesta', { errores, nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+        res.render('encuestas/editEncuesta', { errores, nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado, secciones: modeloEncuesta.seccion });
     } else {
         for (let i = 0; i < modeloEncuesta.seccion.length; i++) {
             if (modeloEncuesta.seccion[i].id_seccion == idAEditar) {
@@ -263,7 +276,7 @@ root.post('/editSeccionEncuesta/:idSeccion', (req, res) => {
                 break;
             }
         }
-        res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+        res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado, secciones: modeloEncuesta.seccion });
     }
 });
 
@@ -279,7 +292,7 @@ root.post('/delSeccion/:idSeccion', (req, res) => {
     res.render('encuestas/newEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
 })
 root.post('/delSeccionEncuesta/:idSeccion', (req, res) => {
-    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite } = req.body;
+    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado } = req.body;
     console.log('eliminando una seccion');
     console.log(req.body);
     const idAEliminar = req.params.idSeccion;
@@ -287,9 +300,16 @@ root.post('/delSeccionEncuesta/:idSeccion', (req, res) => {
         return seccionActal.id_seccion !== parseInt(idAEliminar, 10);
     });
     modeloEncuesta.seccion = newSeccion;
-    res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+    res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado, secciones: modeloEncuesta.seccion });
 })
 
+root.get('/verEncuesta/:idEncuesta', (req, res) => {
+    const idEncuesta = req.params.idEncuesta;
+    dbFire.ref('modelo_encuesta').child(idEncuesta).once('value').then((snapshot) => {
+        const data = snapshot.val();
+        res.render('encuestas/verEncuesta', { encuesta: data });
+    });
+})
 
 
 //PREGUNTAS DE LAS ENCUESTAS
@@ -316,12 +336,12 @@ root.post('/addOpcion/:idSeccion', (req, res) => {
 });
 root.post('/addOpcionEncuesta/:idSeccion', (req, res) => {
     const errores = [];
-    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite } = req.body;
+    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado } = req.body;
     const idSeccion = req.params.idSeccion;
     const { opDeResp } = req.body;
     if (opDeResp[idSeccion - 1] === "" || opDeResp[idSeccion - 1].length == 0) errores.push({ text: "Ingrese la opcion" });
     if (errores.length > 0) {
-        res.render('encuestas/editEncuesta', { errores, nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+        res.render('encuestas/editEncuesta', { errores, nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado, secciones: modeloEncuesta.seccion });
     } else {
         if (modeloEncuesta.seccion.length == 1) {
             if (getCantPreguntas(idSeccion) == 0) {
@@ -380,12 +400,12 @@ root.post('/addOpcion2/:idSeccion/:idPregunta', (req, res) => {
 });
 root.post('/addOpcion2Encuesta/:idSeccion/:idPregunta', (req, res) => {
     const errores = [];
-    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite } = req.body;
+    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado } = req.body;
     const { idSeccion, idPregunta } = req.params;
     const { opDeResp, opActual } = req.body;
     if (opDeResp[opDeResp.length - 1] === "" || opDeResp[opDeResp.length - 1].length == 0) errores.push({ text: "Ingrese la opcion" });
     if (errores.length > 0) {
-        res.render('encuestas/editEncuesta', { errores, nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+        res.render('encuestas/editEncuesta', { errores, nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado, secciones: modeloEncuesta.seccion });
     } else {
         let opcionesPregunta = getOpDeResp(parseInt(idSeccion), parseInt(idPregunta));
         let datoInicial = opcionesPregunta[opcionesPregunta.length - 1];
@@ -485,13 +505,13 @@ root.post('/getDatosPregunta/:idSeccion', (req, res) => {
 });
 root.post('/getDatosPreguntaEncuesta/:idSeccion', (req, res) => {
     const errores = [];
-    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite } = req.body;
+    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado } = req.body;
     const idSeccion = req.params.idSeccion;
     const { nombre_p, tipo } = req.body;
     if (nombre_p[idSeccion - 1] === "" || nombre_p[idSeccion - 1].length == 0) errores.push({ text: "Ingrese el nombre de la pregunta" });
     if (errores.length > 0) {
         listaDeOp = new Array();
-        res.render('encuestas/editEncuesta', { errores, nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+        res.render('encuestas/editEncuesta', { errores, nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado, secciones: modeloEncuesta.seccion });
     } else {
         idPre = getCantPreguntas(idSeccion) + 1;
         if (modeloEncuesta.seccion.length == 1) {
@@ -507,7 +527,7 @@ root.post('/getDatosPreguntaEncuesta/:idSeccion', (req, res) => {
             addpregunta(idSeccion, preguntaC);
         }
         listaDeOp = new Array();
-        res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+        res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado, secciones: modeloEncuesta.seccion });
     }
 });
 
@@ -564,7 +584,7 @@ root.post('/editPregunta/:idSeccion/:idPregunta', (req, res) => {
 });
 root.post('/editPreguntaEncuesta/:idSeccion/:idPregunta', (req, res) => {
     const errores = [];
-    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite } = req.body;
+    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado } = req.body;
     const idSeccion = req.params.idSeccion;
     const idPregunta = req.params.idPregunta;
     const { nombre_p, tipo, opActual } = req.body;
@@ -578,7 +598,7 @@ root.post('/editPreguntaEncuesta/:idSeccion/:idPregunta', (req, res) => {
     if (existeCampoVacio(opActual) || opActual === "" || opActual.length == 0) errores.push({ text: "No puede ingresar campos vacios" });
     if (errores.length > 0) {
         listaDeOp = new Array();
-        res.render('encuestas/editEncuesta', { errores, nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+        res.render('encuestas/editEncuesta', { errores, nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado, secciones: modeloEncuesta.seccion });
     } else {
         if (opcionesPregunta.length == 1) {
             console.log('********** VIENDO QUE PASA CON UN INPUTS **********');
@@ -607,7 +627,7 @@ root.post('/editPreguntaEncuesta/:idSeccion/:idPregunta', (req, res) => {
         setPregunta(parseInt(idSeccion), parseInt(idPregunta), newNombre, newTipo, listaFinal);
 
         listaDeOp = new Array();
-        res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+        res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado, secciones: modeloEncuesta.seccion });
 
     }
 });
@@ -633,7 +653,7 @@ root.post('/delPregunta/:idSeccion/:idPregunta', (req, res) => {
 root.post('/delPreguntaEncuesta/:idSeccion/:idPregunta', (req, res) => {
     const idAEliminar = req.params.idSeccion;
     const idPregunta = req.params.idPregunta;
-    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite } = req.body;
+    const { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado } = req.body;
     for (let i = 0; i < modeloEncuesta.seccion.length; i++) {
         if (modeloEncuesta.seccion[i].id_seccion == idAEliminar) {
             var newPreguntas = modeloEncuesta.seccion[i].preguntas.filter((preguntaActual) => {
@@ -644,7 +664,7 @@ root.post('/delPreguntaEncuesta/:idSeccion/:idPregunta', (req, res) => {
             break;
         }
     }
-    res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+    res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, estado, secciones: modeloEncuesta.seccion });
 });
 root.post('/delOpcion/:idSeccion', () => listaDeOp = new Array());
 

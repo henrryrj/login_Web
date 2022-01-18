@@ -82,3 +82,24 @@ body {
 .card-section:hover {
   box-shadow: 1px 1px 20px #d2d2d2;
 }
+
+#preguntas {
+  margin-top: -20px;
+  height: 50px;
+  box-shadow: 1px 5px 15px #a2a2a2;
+  background: linear-gradient(-90deg, #11998e, #38ef7d);
+}
+.card-section2 {
+  text-size-adjust: 10px;
+  box-shadow: 0 2px 5px 0 rgba(231, 228, 228, 0.822),
+    0 2 px 10px 0 rgba(231, 228, 228, 0.822);
+}
+#opciones {
+  text-size-adjust: 10px;
+  box-shadow: 0 2px 5px 0 rgba(231, 228, 228, 0.822),
+    0 2 px 10px 0 rgba(231, 228, 228, 0.822);
+    background-color: rgba(231, 228, 228, 0.822);
+}
+#opcionesLi {
+    background-color: rgba(231, 228, 228, 0.822);
+}

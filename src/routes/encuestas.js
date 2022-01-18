@@ -91,13 +91,13 @@ root.post('/B/disminuirAplicaciones/:idEncuesta', (req, res) => {
       var nodo = snapshot.val();
       if (nodo.cant_aplicaciones > 0) {
         nodo.cant_aplicaciones = nodo.cant_aplicaciones - 1;
+        dbFire.ref('modelo_encuesta').child(snapshot.key).set(nodo);
+        res.status(200).json('ok');
       } else {
-       nodo.estado = false;
+        nodo.estado = false;
+        res.status(200).json('sin aplicaciones disponibles');
       }
     }
-    console.log(nodo);
-    dbFire.ref('modelo_encuesta').child(snapshot.key).set(nodo);
-    res.status(200).json('ok');
   });
 })
 root.get('/B/listaDeEncuestas', async (req, res) => {

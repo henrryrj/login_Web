@@ -24,6 +24,19 @@
                     <br>
                     <div class="row d-flex justify-content-between align-items-center">
                         <div class="col md-4 mx-auto">
+                            <label for="text" class="border">Estado</label>
+                            <select class="form-select" name="estado">
+
+                                {{#esIgual this.estado "true"}}
+                                <option value="true">True</option>
+                                <option value="false">False</option>
+                                {{else}}
+                                <option value="false">False</option>
+                                <option value="true">True</option>
+                                {{/esIgual}}
+                            </select>
+                        </div>
+                        <div class="col md-4 mx-auto">
                             <label for="text" class="border">Fecha Limite: </label>
                             <input type="date" name="fechaLimite" class="form-control input-sm"
                                 value="{{fechaLimite}}" />
@@ -76,15 +89,15 @@
                                                     <td class="text-center ">
 
                                                         <button class="btn btn-success" data-bs-toggle="modal"
-                                                            type="button"
-                                                            data-bs-target="#add-pre-{{id_seccion}}">Add.
+                                                            type="button" data-bs-target="#add-pre-{{id_seccion}}">Add.
                                                             Pregunta</button>
                                                         <button type="button" class="btn btn-primary"
                                                             id="btnEditSeccion" data-bs-toggle="modal"
                                                             data-bs-target="#edit-modal-{{id_seccion}}">
                                                             Edit. Sec
                                                         </button>
-                                                        <button type="button" class="btn btn-danger" onclick="cambiarAccionDeleteEncuesta({{id_seccion}})"
+                                                        <button type="button" class="btn btn-danger"
+                                                            onclick="cambiarAccionDeleteEncuesta({{id_seccion}})"
                                                             class="btn btn-danger">Del. Sec</button>
                                                     </td>
                                                     </th>
@@ -157,7 +170,8 @@
                                                         class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
-                                                                <h5 class="modal-title">Editar Seccion: {{id_seccion}}</h5>
+                                                                <h5 class="modal-title">Editar Seccion: {{id_seccion}}
+                                                                </h5>
                                                                 <button type="button" class="btn-close"
                                                                     data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
@@ -242,8 +256,9 @@
                                                                 data-bs-target="#editPregu-modal-{{../this.id_seccion}}-{{this.id_pregunta}}">
                                                                 Edit. Pregunta
                                                             </button>
-                                                            <button type="button" class="btn btn-danger" onclick="cambiarAccionDeletePreguntaEncuesta({{../id_seccion}},{{this.id_pregunta}})"
-                                                            class="btn btn-danger">Del. Preg</button>
+                                                            <button type="button" class="btn btn-danger"
+                                                                onclick="cambiarAccionDeletePreguntaEncuesta({{../id_seccion}},{{this.id_pregunta}})"
+                                                                class="btn btn-danger">Del. Preg</button>
                                                         </td>
                                                         </th>
                                                     </tr>

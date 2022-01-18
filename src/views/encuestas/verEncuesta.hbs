@@ -1,0 +1,105 @@
+{{#if encuesta}}
+
+<div class="container principal">
+    <div class="row gy-5">
+
+        <div class="col-md-8 mx-auto">
+            <div class="card-section card-section-third border rounded">
+                <div
+                    class="card-header card-header-third rounded d-flex align-items-center d-flex justify-content-center">
+                    <h2 class="card-header-title mb-3 text-white">{{encuesta.nombre_e}}</h2>
+                </div>
+                <div class="card-body mb-2">
+                    <div class="container" id="contenedorDescipcion">
+                        <div class="row">
+                            <p class="card-text">
+                                {{encuesta.descripcion}}
+                            </p>
+                        </div>
+                        <br>
+                        <div class="row d-flex justify-content-between align-items-left">
+                            <p class="card-text">
+                                Secciones: {{encuesta.cant_secciones}}
+                            </p>
+                        </div>
+                        <div class="row d-flex justify-content-between align-items-left">
+                            <p class="card-text">
+                                Aplicaciones Disponibles: {{encuesta.cant_aplicaciones}}
+                            </p>
+                        </div>
+                        <div class="row d-flex justify-content-between align-items-center">
+                            <div class="col md-4">
+                                <p class="card-text"> Fecha de Creacion: {{encuesta.createAt}}
+                                </p>
+                            </div>
+                            <div class="col md-4">
+                                <p class="card-text">
+                                    Fecha Limite: {{encuesta.fechaLimite}}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row d-flex justify-content-between align-items-left">
+                            <p class="card-text text-red">
+                                Estado: {{encuesta.estado}}
+                            </p>
+                        </div>
+                    </div>
+                    <hr>
+                    {{#each encuesta.seccion}}
+                    <div class="card-body">
+                        <div
+                            class="card-header card-header-third rounded d-flex align-items-center d-flex justify-content-center">
+                            <h3 class="card-header-title mb-3 text-white">Seccion: {{math @key "+" 1}}</h3>
+                        </div>
+                        <br>
+                        <div class="row d-flex justify-content-between align-items-center">
+                            <div class="col md-4">
+                                <h4 class="card-text">{{nombre_s}}</h4>
+                            </div>
+                            <div class="col md-4">
+                                <h4 class="card-text">Cant. Preguntas: {{cant_preguntas}}</h4>
+                            </div>
+                        </div>
+                        <br>
+                        <br>
+                        <div class="card-header card-header-third rounded d-flex align-items-center d-flex justify-content-center"
+                            id="preguntas">
+                            <h4 class="card-header-title mb-3 text-white">Preguntas</h4>
+                        </div>
+                        <br>
+                        {{#each preguntas}}
+                        <h5 class="card-title">Pregunta: {{math @index "+" 1}}</h5>
+                        <br>
+                        <div class="row d-flex justify-content-between align-items-center">
+                            <div class="col md-4">
+                                <h4 class="card-text">{{this.nombre_p}}</h4>
+                            </div>
+                            <div class="col md-4">
+                                <h5 for="text">Tipo de pregunta:</h5>
+                                <h6 class="card-text">{{this.tipo}}</h6>
+                            </div>
+                            <div class="col md-4 align-items-center">
+                                <h5 for="text">Opciones de Respuesta</h5>
+                                <div class="card-section2 card-section-third border rounded">
+                                    <ul class="list-group" id="opciones">
+                                        {{#each this.op_de_resp}}
+                                        <li class="list-group-item" id="opcionesLi">{{this}}</li>
+                                        {{else}}
+                                        <div class="card-text text-center">Esta
+                                            pregunta no tiene opciones de respuesta</div>
+                                        {{/each}}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        {{/each}}
+                    </div>
+                    <hr>
+                    {{/each}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{/if}}
