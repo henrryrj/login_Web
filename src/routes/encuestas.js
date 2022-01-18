@@ -114,6 +114,18 @@ root.get('/B/listaDeEncuestas', async (req, res) => {
     res.status(200).json(listaDeEncuestas);
   });
 });
+root.get('/B/listaDeEncuestasResultado', async (req, res) => {
+  var listaDeEncuestas = [];
+  dbFire.ref('modelo_encuesta').orderByValue().once('value').then((snapshot) => {
+    console.log(snapshot.val());
+    snapshot.forEach((nodo) => {
+      let { nombre_e, descripcion, cant_aplicaciones, cant_secciones, createAt, fechaLimite, estado, } = nodo.val();
+        var encuestaActual = new EncuestaSinSeccion({ id_encuesta: nodo.key, nombre_e, descripcion, cant_aplicaciones, cant_secciones, createAt, fechaLimite, estado });
+        listaDeEncuestas.push(encuestaActual);
+    });
+    res.status(200).json(listaDeEncuestas);
+  });
+});
 
 root.get('/B/getEncuesta/:idABuscar', async (req, res) => {
   const idABuscar = req.params.idABuscar;
