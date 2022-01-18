@@ -1,8 +1,84 @@
 body {
-    background: #00416A;
-    /* fallback for old browsers */
-    background: -webkit-linear-gradient(to right, #E4E5E6, #00416A);
-    /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(to right, #E4E5E6, #00416A);
-    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: #ada996; /* fallback for old browsers */
+  background: -webkit-linear-gradient(
+    to right,
+    #eaeaea,
+    #dbdbdb,
+    #f2f2f2,
+    #ada996
+  ); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(
+    to right,
+    #eaeaea,
+    #dbdbdb,
+    #f2f2f2,
+    #ada996
+  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+.principal {
+  margin-top: 50px;
+  font-family: "Roboto";
+}
+
+/*tarjeta 1*/
+.card-header-first {
+  margin-top: -40px;
+  height: 120px;
+  background: linear-gradient(-90deg, #00416a, #7e93c0be);
+  box-shadow: 1px 5px 15px #a2a2a2;
+}
+
+/*tarjeta 2*/
+.card-header-second {
+  box-shadow: 1px 7px 15px #a2a2a2;
+  margin: -25px -25px 0px -25px;
+  height: 120px;
+  background: linear-gradient(-90deg, #8e2de2, #4a00e0);
+}
+
+/*tarjeta 3*/
+.card-header-third {
+  margin-top: -25px;
+  height: 100px;
+  box-shadow: 1px 5px 15px #a2a2a2;
+  background: linear-gradient(-90deg, #11998e, #38ef7d);
+}
+
+.card-section-third span i {
+  padding: 17px;
+  margin: 0px 10px;
+  color: #fff;
+  height: 50px;
+  width: 50px;
+  box-shadow: 1px 6px 24px #a2a2a2;
+  background: linear-gradient(-90deg, #11998e, #38ef7d);
+}
+#iconoDel {
+  padding: 17px;
+  margin: 0px 10px;
+  color: #fff;
+  height: 50px;
+  width: 50px;
+  box-shadow: 1px 6px 24px #a2a2a2;
+  background: linear-gradient(-90deg, #b11212, #a72d2d);
+}
+
+.card-header-third span i:hover,
+.card-section-third span i:hover {
+  box-shadow: 1px 1px 15px #000;
+}
+
+/*efecto shadows para todas las tarjetas*/
+.card-section {
+  text-size-adjust: 10px;
+  box-shadow: 0 2px 5px 0 rgba(231, 228, 228, 0.822),
+    0 2 px 10px 0 rgba(231, 228, 228, 0.822);
+}
+/*Para el efecto sombra al pasar por encima el mouse*/
+.card-section:hover {
+  box-shadow: 1px 1px 20px #d2d2d2;
 }

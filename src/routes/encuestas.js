@@ -86,8 +86,9 @@ async function getOpcionesDeRespuestaParaPregunta(idABuscar, idDeLaPregunta) {
 // peticiones a firebase, FALTA ARREGLAR ESTO
 root.get('/B/listaDeEncuestas', async (req, res) => {
   var listaDeEncuestas = [];
-  dbFire.ref('modelo_encuesta').once('value').then((snapshot) => {
+  dbFire.ref('modelo_encuesta').orderByValue().once('value').then((snapshot) => {
     // id_encueta, nombre_e, descripcion, cant_secciones, estado
+    console.log(snapshot.val());
     snapshot.forEach((nodo) => {
       let { nombre_e, descripcion, cant_aplicaciones, cant_secciones, createAt, fechaLimite, estado, } = nodo.val();
       var encuestaActual = new EncuestaSinSeccion({ id_encuesta: nodo.key, nombre_e, descripcion, cant_aplicaciones, cant_secciones, createAt, fechaLimite, estado });
@@ -102,7 +103,7 @@ root.get('/B/getEncuesta/:idABuscar', async (req, res) => {
   var listaDeSecciones = [];
   var listaDePreguntas = [];
   dbFire.ref('modelo_encuesta').child(idABuscar).once('value').then((snapshot) => {
-    if (snapshot != null) {
+    if (snapshot.val() != null) {
       let idEncuesta = snapshot.key;
       const { nombre_e, descripcion, cant_aplicaciones, cant_secciones, createAt, fechaLimite, estado, seccion } = snapshot.val();
       for (const keySeccion in seccion) {
@@ -124,7 +125,7 @@ root.get('/B/getEncuesta/:idABuscar', async (req, res) => {
       const encuesta = new Encuesta({ id_encuesta: idEncuesta, nombre_e, descripcion, cant_aplicaciones, cant_secciones, createAt, fechaLimite, estado, seccion: listaDeSecciones });
       res.status(200).json(encuesta);
     } else {
-      res.status(500).json({ message: 'La encuesta no existe.' });
+      res.status(443).json({ Error: 'La encuesta no existe.' });
     }
   });
 });
@@ -148,115 +149,118 @@ const cargarCantidades = (lista) => {
 }
 root.get('/B/getResultadosEncuesta/:idABuscar', async (req, res) => {
   const idABuscar = req.params.idABuscar;
-  var contador = 0;
   const urlUnaEncuesta = `https://encuesta-login-web.herokuapp.com/API/encuestas/B/getEncuesta/${idABuscar}`;
   const urlVeriAplicacion = `https://encuesta-login-web.herokuapp.com/API/encuestas/B/tieneAplicacion/${idABuscar}`;
   var headers = { 'Content-Type': 'application/json' };
   var params = { method: 'GET', headers };
-  var resp = await fetch(urlUnaEncuesta, params);
-  var encuestaAnalizar = await resp.json();
-  const { nombre_e, descripcion, cant_secciones, fechaLimite, seccion } = encuestaAnalizar;
-  var resultado = new Resultado(
-    {
-      idEncuesta: idABuscar,
-      nombreEncuesta: nombre_e,
-      descripcion: descripcion,
-      cantAplicaciones: 0,
-      cantSecciones: cant_secciones,
-      preguntasTotales: 0,
-      fechaLimite: fechaLimite,
-      resultados: []
-    });
-  let preguntasTotales = sacarTodasLasPreguntas(seccion);
-  resultado.preguntasTotales = preguntasTotales.length;
-  var respVeri = await fetch(urlVeriAplicacion);
+
+  var respVeri = await fetch(urlVeriAplicacion, params);
   var bool = await respVeri.json();
-  dbFire.ref('aplicacion_encuesta').once('value').then((snapshot) => {
-    if (snapshot != null) {
-      snapshot.forEach((appActual) => {
-        const { id_encuesta } = appActual.val();
-        if (id_encuesta === resultado.idEncuesta) resultado.cantAplicaciones += 1;
+  console.log(bool);
+  if (bool) {
+    var resp = await fetch(urlUnaEncuesta, params);
+    var encuestaAnalizar = await resp.json();
+    const { nombre_e, descripcion, cant_secciones, fechaLimite, seccion } = encuestaAnalizar;
+    var resultado = new Resultado(
+      {
+        idEncuesta: idABuscar,
+        nombreEncuesta: nombre_e,
+        descripcion: descripcion,
+        cantAplicaciones: 0,
+        cantSecciones: cant_secciones,
+        preguntasTotales: 0,
+        fechaLimite: fechaLimite,
+        resultados: []
       });
-      for (let i = 0; i < preguntasTotales.length; i++) {
-        let tipoP = preguntasTotales[i].tipo;
-        if (tipoP !== 'abierta') {
-          console.log(`++++++pregunta: ${tipoP}++++++++`);
-          let resp = new Respuesta({
-            idPregunta: preguntasTotales[i].id_pregunta,
-            tipoPregunta: tipoP,
-            nombreP: preguntasTotales[i].nombre_p,
-            cantResp: cargarCantidades(preguntasTotales[i].op_de_resp),
-            nombreOpcion: preguntasTotales[i].op_de_resp,
-          });
-          console.log('OBJETO RESPUESTA:')
-          console.log(`cantidades: => ${resp.cantResp}\nopciones  : => ${JSON.stringify(resp.nombreOpcion)}\n\n`);
-          for (let j = 0; j < preguntasTotales[i].op_de_resp.length; j++) {
-            let opcionAnalizar = preguntasTotales[i].op_de_resp[j];
-            console.log(`OPCION ACTUAL: => ${opcionAnalizar.id_resp} : ${opcionAnalizar.nombre_resp}`);
-            //RECORRIENDO LAS APLICACIONES
-            snapshot.forEach((appActual) => {
-              const { id_encuesta, id, respDePreguntas } = appActual.val();
-              if (id_encuesta === idABuscar) {
-                console.log(appActual.key);
-                while (respDePreguntas.length > 0) {
-                  console.log('+++++OPCION SELECIONADA+++++');
-                  if (respDePreguntas[0].tipoPregunta !== 'abierta') {
-                    let opSelecionada = respDePreguntas[0].opcions;
-                    console.log(opSelecionada);
-                    while (opSelecionada.length > 0) {
-                      let opSelecionadaActual = opSelecionada[0];
-                      console.log('**********OPCION_ACTUAL************')
-                      console.log(opSelecionadaActual);
-                      if (opcionAnalizar.id_resp === opSelecionadaActual.id_resp) {
-                        let pos = resp.nombreOpcion.findIndex(opSelecionadaActual => opSelecionadaActual.id_resp === opcionAnalizar.id_resp);
-                        console.log(`POSICION: ${pos}`);
-                        resp.cantResp[pos] = resp.cantResp[pos] + 1;
-                      }
-                      opSelecionada.shift();
-                    }
-                  }
-                  respDePreguntas.shift();
-                }
-                console.log(`RESPUESTAS RESTANTES ${respDePreguntas.length}`);
-                console.log(respDePreguntas);
-              }
+    let preguntasTotales = sacarTodasLasPreguntas(seccion);
+    resultado.preguntasTotales = preguntasTotales.length;
+
+    dbFire.ref('aplicacion_encuesta').once('value').then((snapshot) => {
+      if (snapshot.val() != null) {
+        snapshot.forEach((appActual) => {
+          const { id_encuesta } = appActual.val();
+          if (id_encuesta === resultado.idEncuesta) resultado.cantAplicaciones += 1;
+        });
+        for (let i = 0; i < preguntasTotales.length; i++) {
+          let tipoP = preguntasTotales[i].tipo;
+          if (tipoP !== 'abierta') {
+            console.log(`++++++pregunta: ${tipoP}++++++++`);
+            let resp = new Respuesta({
+              idPregunta: preguntasTotales[i].id_pregunta,
+              tipoPregunta: tipoP,
+              nombreP: preguntasTotales[i].nombre_p,
+              cantResp: cargarCantidades(preguntasTotales[i].op_de_resp),
+              nombreOpcion: preguntasTotales[i].op_de_resp,
             });
-            console.log('\n');
-            console.log(resp);
+            console.log('OBJETO RESPUESTA:')
+            console.log(`cantidades: => ${resp.cantResp}\nopciones  : => ${JSON.stringify(resp.nombreOpcion)}\n\n`);
+            for (let j = 0; j < preguntasTotales[i].op_de_resp.length; j++) {
+              let opcionAnalizar = preguntasTotales[i].op_de_resp[j];
+              console.log(`OPCION ACTUAL: => ${opcionAnalizar.id_resp} : ${opcionAnalizar.nombre_resp}`);
+              //RECORRIENDO LAS APLICACIONES
+              snapshot.forEach((appActual) => {
+                const { id_encuesta, id, respDePreguntas } = appActual.val();
+                if (id_encuesta === idABuscar) {
+                  console.log(appActual.key);
+                  while (respDePreguntas.length > 0) {
+                    console.log('+++++OPCION SELECIONADA+++++');
+                    if (respDePreguntas[0].tipoPregunta !== 'abierta') {
+                      let opSelecionada = respDePreguntas[0].opcions;
+                      console.log(opSelecionada);
+                      while (opSelecionada.length > 0) {
+                        let opSelecionadaActual = opSelecionada[0];
+                        console.log('**********OPCION_ACTUAL************')
+                        console.log(opSelecionadaActual);
+                        if (opcionAnalizar.id_resp === opSelecionadaActual.id_resp) {
+                          let pos = resp.nombreOpcion.findIndex(opSelecionadaActual => opSelecionadaActual.id_resp === opcionAnalizar.id_resp);
+                          console.log(`POSICION: ${pos}`);
+                          resp.cantResp[pos] = resp.cantResp[pos] + 1;
+                        }
+                        opSelecionada.shift();
+                      }
+                    }
+                    respDePreguntas.shift();
+                  }
+                  console.log(`RESPUESTAS RESTANTES ${respDePreguntas.length}`);
+                  console.log(respDePreguntas);
+                }
+              });
+              console.log('\n');
+              console.log(resp);
+            }
+            resultado.resultados.push(resp);
           }
-          resultado.resultados.push(resp);
+          if (tipoP === 'abierta') {
+            let resp = new Respuesta({
+              idPregunta: preguntasTotales[i].id_pregunta,
+              tipoPregunta: tipoP,
+              nombreP: preguntasTotales[i].nombre_p,
+              cantResp: [],
+              nombreOpcion: [],
+            });
+            resultado.resultados.push(resp);
+            console.log('++++++PREGUNTA SIN ESTADISTICA+++++');
+          }
+          console.log('++++++RESULTADO DE LA PREGUNTA ++++++');
+          console.log(`cantidades: => ${resp.cantResp}\nopciones  : => ${JSON.stringify(resp.nombreOpcion)}`);
+          console.log('JSON RESULTADO');
         }
-        if (tipoP === 'abierta') {
-          let resp = new Respuesta({
-            idPregunta: preguntasTotales[i].id_pregunta,
-            tipoPregunta: tipoP,
-            nombreP: preguntasTotales[i].nombre_p,
-            cantResp: [],
-            nombreOpcion: [],
-          });
-          resultado.resultados.push(resp);
-          console.log('++++++PREGUNTA SIN ESTADISTICA+++++');
-        }
-        console.log('++++++RESULTADO DE LA PREGUNTA ++++++');
-        console.log(`cantidades: => ${resp.cantResp}\nopciones  : => ${JSON.stringify(resp.nombreOpcion)}`);
-        console.log('JSON RESULTADO');
+        console.log(resultado.resultados);
+        res.status(201).json(resultado);
+      }else{
+    res.status(403).json({ Error: 'No hay aplicaciones de encuesta' });
+
       }
-
-    }
-    console.log(resultado.resultados);
-    console.log(bool);
-    res.status(201).json(resultado);
-  });
-
-  /* } else {
-    res.status(500).json({ error: 'ID invalido' });
-  } */
+    });
+  } else {
+    res.status(403).json({ Error: 'ID invalido' });
+  }
 });
 
 root.get('/B/ExisteAplicacionEncuesta/:idAplicacion', async (req, res) => {
   const idAplicacion = req.params.idAplicacion;
   dbFire.ref('aplicacion_encuesta').once('value').then((snapshot) => {
-    if (snapshot != null) {
+    if (snapshot.val() != null) {
       for (const key in snapshot.val()) {
         const nodo = snapshot.val()[key];
         if (nodo.createAt == idAplicacion) {
@@ -274,7 +278,7 @@ root.get('/B/ExisteAplicacionEncuesta/:idAplicacion', async (req, res) => {
 root.get('/B/tieneAplicacion/:idAplicacion', async (req, res) => {
   const idAplicacion = req.params.idAplicacion;
   dbFire.ref('aplicacion_encuesta').once('value').then((snapshot) => {
-    if (snapshot != null) {
+    if (snapshot.val() != null) {
       for (const key in snapshot.val()) {
         const nodo = snapshot.val()[key];
         console.log(nodo);
@@ -289,7 +293,23 @@ root.get('/B/tieneAplicacion/:idAplicacion', async (req, res) => {
     }
   });
 });
-
+root.get('/B/encuestaValida/:idEncuesta', async (req, res) => {
+  const idEncuesta = req.params.idEncuesta;
+  dbFire.ref('modelo_encuesta').child(idEncuesta).once('value').then((snapshot) => {
+    console.log(snapshot.val());
+    if (snapshot.val() != null) {
+      let { cant_aplicaciones } = snapshot.val();
+      console.log(cant_aplicaciones);
+      if (cant_aplicaciones > 0) {
+        res.status(200).json(true);
+      } else {
+        res.status(433).json(false);
+      }
+    } else {
+      res.status(500).json({ error: 'encuesta no existe' });
+    }
+  });
+});
 
 
 module.exports = root;

@@ -1,42 +1,119 @@
-<div class="container">
-    <div class="table-responsive">
-        <table class="table table-striped">
+<div class="container principal">
+    <div class="row gy-5">
+        {{#each encuestas}}
+        <div class="col-md-6">
+            <div class="card-section card-section-third border rounded">
+                <div
+                    class="card-header card-header-third rounded d-flex align-items-center d-flex justify-content-center">
+                    <h2 class="card-header-title mb-3 text-white">{{nombre_e}}</h2>
+                </div>
+                <div class="card-body mb-2">
+                    <div class="container" id="contenedorDescipcion">
+                        <div class="row">
+                            <p class="card-text">
+                                {{descripcion}}
+                            </p>
+                        </div>
+                        <br>
+                        <div class="row d-flex justify-content-between align-items-left">
+                            <p class="card-text">
+                                Secciones: {{cant_secciones}}
+                            </p>
+                        </div>
+                        <div class="row d-flex justify-content-between align-items-left">
+                            <p class="card-text">
+                                Aplicaciones Disponibles: {{cant_aplicaciones}}
+                            </p>
+                        </div>
+                        <div class="row d-flex justify-content-between align-items-center">
+                            <div class="col md-4">
+                                <p class="card-text"> Fecha de Creacion: {{createAt}}
+                                </p>
+                            </div>
+                            <div class="col md-4">
+                                <p class="card-text">
+                                    Fecha Limite: {{fechaLimite}}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row d-flex justify-content-between align-items-left">
+                            <p class="card-text text-red">
+                                Estado: {{estado}}
+                            </p>
+                        </div>
+                    </div>
 
-            <head class="thead-light">
-                <th scope="col" class="border">#</th>
-                <th scope="col" class="text-center">Nombre Encuesta</th>
-                <th scope="col" class="text-center">Aplicaciones</th>
-                <th scope="col" class="text-center">Secciones</th>
-                <th scope="col" class="text-center">Fecha Creación</th>
-                <th scope="col" class="text-center">Fecha límite</th>
-                <th scope="col" class="text-center">Acciones</th>
-            </head>
-            {{#each encuestas}}
-
-            <body>
-                <tr>
-                    <th class="border">{{id_encuesta}}
-                    <td class="text-center "><label for="text">{{nombre_e}}</label>
-                    </td>
-                    <td class="text-center "><label for="text">{{cant_aplicaciones}}</label></td>
-                    <td class="text-center "><label for="text">{{cant_secciones}}</label></td>
-                    <td class="text-center "><label for="text">{{createAt}}</label>
-                    </td>
-                    <td class="text-center "><label for="text">{{fechaLimite}}</label>
-                    </td>
-                    <td class="text-center ">
-                        <button class="btn btn-success" type="button" data-bs-toggle="modal"
-                            data-bs-target="#add-pre-{{id_seccion}}">Ver Encuesta</button>
-                        <button type="button" class="btn btn-primary" id="btnEditSeccion" data-bs-toggle="modal"
-                            data-bs-target="#edit-modal-{{id_seccion}}">
-                            Edit. Encuesta
-                        </button>
-                        <a href="/encuestas/delSeccion/{{id_seccion}}" class="btn btn-danger">Del. Encuesta</a>
-                    </td>
-                    </th>
-                </tr>
-            </body>
+                    <hr>
+                    <div class="container d-flex justify-content-center align-items-center">
+                        <span><a href="#"><i class="fas fa-poll rounded-circle" aria-hidden="true"></i></a></span>
+                        <span><a href="/encuestas/editEncuesta/{{@key}}"><i class="fas fa-edit rounded-circle"
+                                    aria-hidden="true"></i></a></span>
+                        <span><a href="/encuestas/deleteEncuesta/{{@key}}"><i class="fas fa-trash-alt rounded-circle"
+                                    aria-hidden="true" id="iconoDel"></i></a></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{else}}
+        <div class="container principal">
+            <div class="row gy-5 ">
+                <div class="col-md-6 mx-auto ">
+                    <div class="card-section card-section-third border rounded ">
+                        <div class="row d-flex align-items-center d-flex text-center">
+                            <p class="lead"> No hay encuestas aun.</p>
+                        </div>
+                        <br>
+                        <div class="row d-flex align-items-center d-flex justify-content-center">
+                            <a href="/encuesta/newEncuesta" class="btn btn-success btn-sm"> Cear Encuesta</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {{/each}}
-        </table>
+        </div>
     </div>
-</div>
+
+
+    {{!-- <div class="container">
+        <div class="table-responsive">
+            <table class="table table-striped">
+
+                <head class="thead-light">
+                    <th scope="col" class="border">#</th>
+                    <th scope="col" class="text-center">Nombre Encuesta</th>
+                    <th scope="col" class="text-center">Aplicaciones</th>
+                    <th scope="col" class="text-center">Secciones</th>
+                    <th scope="col" class="text-center">Fecha Creación</th>
+                    <th scope="col" class="text-center">Fecha límite</th>
+                    <th scope="col" class="text-center">Acciones</th>
+                </head>
+                {{#each encuestas}}
+
+                <body>
+                    <tr>
+                        <th class="border">{{id_encuesta}}
+                        <td class="text-center "><label for="text">{{nombre_e}}</label>
+                        </td>
+                        <td class="text-center "><label for="text">{{cant_aplicaciones}}</label></td>
+                        <td class="text-center "><label for="text">{{cant_secciones}}</label></td>
+                        <td class="text-center "><label for="text">{{createAt}}</label>
+                        </td>
+                        <td class="text-center "><label for="text">{{fechaLimite}}</label>
+                        </td>
+                        <td class="text-center ">
+                            <button class="btn btn-success" type="button" data-bs-toggle="modal"
+                                data-bs-target="#add-pre-{{id_seccion}}">Ver Encuesta</button>
+                            <button type="button" class="btn btn-primary" id="btnEditSeccion" data-bs-toggle="modal"
+                                data-bs-target="#edit-modal-{{id_seccion}}">
+                                Edit. Encuesta
+                            </button>
+                            <a href="/encuestas/delSeccion/{{id_seccion}}" class="btn btn-danger">Del.
+                                Encuesta</a>
+                        </td>
+                        </th>
+                    </tr>
+                </body>
+                {{/each}}
+            </table>
+        </div>
+    </div> --}}
