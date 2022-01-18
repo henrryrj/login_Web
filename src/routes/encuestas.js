@@ -170,11 +170,6 @@ root.get('/B/getResultadosEncuesta/:idABuscar', async (req, res) => {
   const urlVeriAplicacion = `https://encuesta-login-web.herokuapp.com/API/encuestas/B/tieneAplicacion/${idABuscar}`;
   var headers = { 'Content-Type': 'application/json' };
   var params = { method: 'GET', headers };
-
-  var respVeri = await fetch(urlVeriAplicacion, params);
-  var bool = await respVeri.json();
-  console.log(bool);
-  if (bool) {
     var resp = await fetch(urlUnaEncuesta, params);
     var encuestaAnalizar = await resp.json();
     const { nombre_e, descripcion, cant_secciones, fechaLimite, seccion } = encuestaAnalizar;
@@ -266,12 +261,8 @@ root.get('/B/getResultadosEncuesta/:idABuscar', async (req, res) => {
         res.status(201).json(resultado);
       } else {
         res.status(403).json({ Error: 'No hay aplicaciones de encuesta' });
-
       }
     });
-  } else {
-    res.status(403).json({ Error: 'ID invalido' });
-  }
 });
 
 root.get('/B/ExisteAplicacionEncuesta/:idAplicacion', async (req, res) => {
