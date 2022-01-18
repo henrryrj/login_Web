@@ -231,6 +231,7 @@ root.post('/editSeccion/:idSeccion', (req, res) => {
     const idAEditar = req.params.idSeccion;
     const { editNombre_s } = req.body;
     const nombreAEditar = editNombre_s[idAEditar - 1];
+    console.log(req.body);
     if (modeloEncuesta.seccion.length > 1) {
         if (nombreAEditar === "" || nombreAEditar.length == 0) errores.push({ text: "Ingrese un nombre a la seccion" });
     } else {
@@ -539,9 +540,11 @@ root.post('/editPregunta/:idSeccion/:idPregunta', (req, res) => {
     const idSeccion = req.params.idSeccion;
     const idPregunta = req.params.idPregunta;
     const { nombre_p, tipo, opActual } = req.body;
+    console.log('viene un error');
+    console.log(req.body);
+    let listaFinal = [];
     let opcionesPregunta = getOpDeResp(parseInt(idSeccion), parseInt(idPregunta));
     let total = opDeRespHastaMi(parseInt(idSeccion), parseInt(idPregunta));
-    let listaFinal = [];
     let posicion = (getCantSecciones() + preguntasTotalesHastaLaSeccion(parseInt(idSeccion)) + parseInt(idPregunta));
     const newNombre = nombre_p[posicion - 1];
     const newTipo = tipo[posicion - 1];
@@ -551,15 +554,19 @@ root.post('/editPregunta/:idSeccion/:idPregunta', (req, res) => {
         listaDeOp = new Array();
         res.render('encuestas/newEncuesta', { errores, nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
     } else {
-        if (opcionesPregunta.length == 1) {
-            console.log('********** VIENDO QUE PASA CON UN INPUTS **********');
-            console.log(opActual);
-            let pos = preguntasTotalesHastaLaSeccion(parseInt(idSeccion)) + parseInt(idPregunta);
-            console.log(pos);
-            if (pos == 1) {
-                listaFinal.push(opActual);
-            } else {
-                listaFinal.push(opActual[pos - 1]);
+        if (newTipo != 'abierta') {
+            if (opcionesPregunta.length == 1) {
+                console.log('********** VIENDO QUE PASA CON UN INPUTS **********');
+                console.log(opActual);
+                let pos = preguntasTotalesHastaLaSeccion(parseInt(idSeccion)) + parseInt(idPregunta);
+                console.log(pos);
+                if (pos == 1) {
+                    listaFinal.push(opActual);
+                } else {
+                    listaFinal.push(opActual[pos - 1]);
+                }
+            }else{
+                listaFinal = new Array();
             }
         } else {
             console.log('********** VIENDO QUE PASA CON LOS INPUTS **********');
