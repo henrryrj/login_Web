@@ -566,12 +566,6 @@ function del(idSeccion, idPregunta, idDIv, dato) {
     delUnaOpcion2(idSeccion, idPregunta, dato);
 }
 
-/* function delEncuesta(idSeccion, idPregunta, idDIv, dato) {
-    console.log(idSeccion, idPregunta, idDIv, dato);
-    document.getElementById(idDIv).remove();
-    delUnaOpcion2(idSeccion, idPregunta, dato);
-} */
-
 
 
 

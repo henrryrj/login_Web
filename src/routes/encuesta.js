@@ -2,7 +2,6 @@ const root = require('express').Router();
 const Pregunta = require('../models/pregunta');
 const Seccion = require('../models/seccion');
 const { Encuesta } = require('../models/encuesta');
-const OpDeResp = require('../models/op_de_resp');
 const dbFire = require('../firebase');
 const fetch = (...args) =>
     import("node-fetch").then(({ default: fetch }) => fetch(...args));
@@ -44,6 +43,7 @@ const vaciarEncuesta = () => {
 
 
 root.get('/listaEncuestas', (re, res) => {
+    let encuestasActivas = [];
     dbFire.ref('modelo_encuesta').once('value').then((snapshot) => {
         const data = snapshot.val();
         res.render('encuestas/listaDeEncuestas', { encuestas: data });
@@ -644,7 +644,7 @@ root.post('/delPreguntaEncuesta/:idSeccion/:idPregunta', (req, res) => {
             break;
         }
     }
-    res.render('encuestas/newEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
+    res.render('encuestas/editEncuesta', { nombre_e, descripcion, cant_aplicaciones, fechaLimite, secciones: modeloEncuesta.seccion });
 });
 root.post('/delOpcion/:idSeccion', () => listaDeOp = new Array());
 

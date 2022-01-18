@@ -84,15 +84,32 @@ async function getOpcionesDeRespuestaParaPregunta(idABuscar, idDeLaPregunta) {
   return L1;
 }
 // peticiones a firebase, FALTA ARREGLAR ESTO
+root.post('/B/disminuirAplicaciones/:idEncuesta', (req, res) => {
+  const idEncuesta = req.params.idEncuesta;
+  dbFire.ref('modelo_encuesta').child(idEncuesta).once('value').then((snapshot) => {
+    if (snapshot.val() != null) {
+      var nodo = snapshot.val();
+      if (nodo.cant_aplicaciones > 0) {
+        nodo.cant_aplicaciones = nodo.cant_aplicaciones - 1;
+      } else {
+       nodo.estado = false;
+      }
+    }
+    console.log(nodo);
+    dbFire.ref('modelo_encuesta').child(snapshot.key).set(nodo);
+    res.status(200).json('ok');
+  });
+})
 root.get('/B/listaDeEncuestas', async (req, res) => {
   var listaDeEncuestas = [];
   dbFire.ref('modelo_encuesta').orderByValue().once('value').then((snapshot) => {
-    // id_encueta, nombre_e, descripcion, cant_secciones, estado
     console.log(snapshot.val());
     snapshot.forEach((nodo) => {
       let { nombre_e, descripcion, cant_aplicaciones, cant_secciones, createAt, fechaLimite, estado, } = nodo.val();
-      var encuestaActual = new EncuestaSinSeccion({ id_encuesta: nodo.key, nombre_e, descripcion, cant_aplicaciones, cant_secciones, createAt, fechaLimite, estado });
-      listaDeEncuestas.push(encuestaActual);
+      if (cant_aplicaciones > 0 || estado) {
+        var encuestaActual = new EncuestaSinSeccion({ id_encuesta: nodo.key, nombre_e, descripcion, cant_aplicaciones, cant_secciones, createAt, fechaLimite, estado });
+        listaDeEncuestas.push(encuestaActual);
+      }
     });
     res.status(200).json(listaDeEncuestas);
   });
@@ -247,8 +264,8 @@ root.get('/B/getResultadosEncuesta/:idABuscar', async (req, res) => {
         }
         console.log(resultado.resultados);
         res.status(201).json(resultado);
-      }else{
-    res.status(403).json({ Error: 'No hay aplicaciones de encuesta' });
+      } else {
+        res.status(403).json({ Error: 'No hay aplicaciones de encuesta' });
 
       }
     });
